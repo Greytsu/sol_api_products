@@ -1,0 +1,9 @@
+[mssql]
+host = "localhost"
+port = "1444"
+dbname = "master"
+schema = "products"
+user = "sa"
+pass = "Pass@word"
+sslmode = "disable"
+
