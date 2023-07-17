@@ -1,12 +1,10 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
 	"fr/greytsu/sol_api_products/config"
 	"fr/greytsu/sol_api_products/database"
-	"fr/greytsu/sol_api_products/models"
+	product "fr/greytsu/sol_api_products/products"
+	"github.com/gin-gonic/gin"
 	"log"
 )
 
@@ -24,11 +22,18 @@ func main() {
 		log.Fatal("Exiting")
 	}
 
-	product, err := models.PRProducts().One(context.Background(), databaseCon.GetDatabaseCon())
-	fmt.Println(product)
-	options, err := product.OpFKProductOpOptions().All(context.Background(), databaseCon.GetDatabaseCon())
-	for i := 0; i < len(options); i++ {
-		jsonOption, _ := json.Marshal(options[i])
-		fmt.Println(string(jsonOption))
+	//Init product
+	productRepository := product.NewProductRepository(databaseCon.GetDatabaseCon())
+	productService := product.NewProductService(productRepository)
+
+	//Create the Gin router
+	router := gin.Default()
+
+	//Routes
+	product.RegisterProductRoutes(router, productService)
+
+	err = router.Run(":8080")
+	if err != nil {
+		log.Fatalf("Failed to start the server: %s", err.Error())
 	}
 }
