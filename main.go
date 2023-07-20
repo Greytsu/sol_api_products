@@ -3,7 +3,7 @@ package main
 import (
 	"fr/greytsu/sol_api_products/config"
 	"fr/greytsu/sol_api_products/database"
-	product "fr/greytsu/sol_api_products/products"
+	"fr/greytsu/sol_api_products/product"
 	"github.com/gin-gonic/gin"
 	"log"
 )
