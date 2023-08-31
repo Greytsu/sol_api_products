@@ -4,17 +4,17 @@
 package models
 
 var TableNames = struct {
-	BeBundleElement string
-	BuBundle        string
-	OpOption        string
-	PRProduct       string
-	STStock         string
-	WaWarehouse     string
+	Bundle        string
+	BundleElement string
+	Product       string
+	Stock         string
+	Variant       string
+	Warehouse     string
 }{
-	BeBundleElement: "be_bundle_element",
-	BuBundle:        "bu_bundle",
-	OpOption:        "op_option",
-	PRProduct:       "pr_product",
-	STStock:         "st_stock",
-	WaWarehouse:     "wa_warehouse",
+	Bundle:        "bundle",
+	BundleElement: "bundle_element",
+	Product:       "product",
+	Stock:         "stock",
+	Variant:       "variant",
+	Warehouse:     "warehouse",
 }
