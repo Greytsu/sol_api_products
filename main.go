@@ -4,6 +4,7 @@ import (
 	"fr/greytsu/sol_api_products/config"
 	"fr/greytsu/sol_api_products/database"
 	"fr/greytsu/sol_api_products/product"
+	"fr/greytsu/sol_api_products/variant"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -26,11 +27,15 @@ func main() {
 	productRepository := product.NewProductRepository(databaseCon.GetDatabaseCon())
 	productService := product.NewProductService(productRepository)
 
+	//Init vaariant
+	variantRepository := variant.NewVariantRepository(databaseCon.GetDatabaseCon())
+	variantService := variant.NewVariantService(variantRepository)
+
 	//Create the Gin router
 	router := gin.Default()
 
 	//Routes
-	product.RegisterProductRoutes(router, productService)
+	product.RegisterProductRoutes(router, productService, variantService)
 
 	err = router.Run(":8080")
 	if err != nil {

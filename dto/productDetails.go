@@ -40,7 +40,10 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 		variant.UpdateTime = value.UpdateTime
 		variant.Deleted = value.Deleted
 		variant.FKProductID = value.FKProductID
-		variant.Stock = *value.R.GetFKVariantStocks()[0]
+		stocks := value.R.GetFKVariantStocks()
+		if stocks != nil {
+			variant.Stock = *stocks[0]
+		}
 		variantsStock = append(variantsStock, variant)
 	}
 	productVariants.Variants = variantsStock

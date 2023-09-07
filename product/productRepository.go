@@ -3,11 +3,13 @@ package product
 import (
 	"context"
 	"database/sql"
+	"sync"
+
 	"fr/greytsu/sol_api_products/dto"
 	"fr/greytsu/sol_api_products/models"
+
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"sync"
 )
 
 type ProductRepository struct {
