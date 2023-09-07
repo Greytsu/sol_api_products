@@ -7,7 +7,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/volatiletech/sqlboiler/v4/types"
 	"reflect"
 	"strconv"
 	"strings"
@@ -25,16 +24,16 @@ import (
 
 // Variant is an object representing the database table.
 type Variant struct {
-	ID            int               `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CompanyID     int               `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
-	Name          string            `boil:"name" json:"name" toml:"name" yaml:"name"`
-	StockTracking bool              `boil:"stock_tracking" json:"stock_tracking" toml:"stock_tracking" yaml:"stock_tracking"`
-	PurchasePrice types.NullDecimal `boil:"purchase_price" json:"purchase_price,omitempty" toml:"purchase_price" yaml:"purchase_price,omitempty"`
-	SellingPrice  types.NullDecimal `boil:"selling_price" json:"selling_price,omitempty" toml:"selling_price" yaml:"selling_price,omitempty"`
-	CreateTime    time.Time         `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
-	UpdateTime    time.Time         `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted       null.Bool         `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
-	FKProductID   int               `boil:"fk_product_id" json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
+	ID            int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CompanyID     int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
+	Name          string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	StockTracking bool      `boil:"stock_tracking" json:"stock_tracking" toml:"stock_tracking" yaml:"stock_tracking"`
+	PurchasePrice float64   `boil:"purchase_price" json:"purchase_price" toml:"purchase_price" yaml:"purchase_price"`
+	SellingPrice  float64   `boil:"selling_price" json:"selling_price" toml:"selling_price" yaml:"selling_price"`
+	CreateTime    time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
+	UpdateTime    time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
+	Deleted       null.Bool `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
+	FKProductID   int       `boil:"fk_product_id" json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
 
 	R *variantR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L variantL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -99,30 +98,33 @@ func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
-type whereHelpertypes_NullDecimal struct{ field string }
+type whereHelperfloat64 struct{ field string }
 
-func (w whereHelpertypes_NullDecimal) EQ(x types.NullDecimal) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
-func (w whereHelpertypes_NullDecimal) NEQ(x types.NullDecimal) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpertypes_NullDecimal) LT(x types.NullDecimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertypes_NullDecimal) LTE(x types.NullDecimal) qm.QueryMod {
+func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpertypes_NullDecimal) GT(x types.NullDecimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertypes_NullDecimal) GTE(x types.NullDecimal) qm.QueryMod {
+func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
-
-func (w whereHelpertypes_NullDecimal) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpertypes_NullDecimal) IsNotNull() qm.QueryMod {
-	return qmhelper.WhereIsNotNull(w.field)
+func (w whereHelperfloat64) IN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
 var VariantWhere = struct {
@@ -130,8 +132,8 @@ var VariantWhere = struct {
 	CompanyID     whereHelperint
 	Name          whereHelperstring
 	StockTracking whereHelperbool
-	PurchasePrice whereHelpertypes_NullDecimal
-	SellingPrice  whereHelpertypes_NullDecimal
+	PurchasePrice whereHelperfloat64
+	SellingPrice  whereHelperfloat64
 	CreateTime    whereHelpertime_Time
 	UpdateTime    whereHelpertime_Time
 	Deleted       whereHelpernull_Bool
@@ -141,8 +143,8 @@ var VariantWhere = struct {
 	CompanyID:     whereHelperint{field: "[products].[variant].[company_id]"},
 	Name:          whereHelperstring{field: "[products].[variant].[name]"},
 	StockTracking: whereHelperbool{field: "[products].[variant].[stock_tracking]"},
-	PurchasePrice: whereHelpertypes_NullDecimal{field: "[products].[variant].[purchase_price]"},
-	SellingPrice:  whereHelpertypes_NullDecimal{field: "[products].[variant].[selling_price]"},
+	PurchasePrice: whereHelperfloat64{field: "[products].[variant].[purchase_price]"},
+	SellingPrice:  whereHelperfloat64{field: "[products].[variant].[selling_price]"},
 	CreateTime:    whereHelpertime_Time{field: "[products].[variant].[create_time]"},
 	UpdateTime:    whereHelpertime_Time{field: "[products].[variant].[update_time]"},
 	Deleted:       whereHelpernull_Bool{field: "[products].[variant].[deleted]"},
