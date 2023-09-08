@@ -17,5 +17,5 @@ func (warehouseService WarehouseService) GetAllWarehouses(companyId string) ([]*
 }
 
 func (warehouseService WarehouseService) CreateWarehouse(warehouse *models.Warehouse) (*models.Warehouse, error) {
-	return warehouseService.warehouseRepository.CreateWarehouse(warehouse)
+	return warehouseService.warehouseRepository.createWarehouse(warehouse)
 }

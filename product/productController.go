@@ -51,7 +51,7 @@ func postProduct(productService *ProductService) gin.HandlerFunc {
 		if err := c.BindJSON(&newProduct); err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
 		}
-		product, err := productService.createProduct(&newProduct)
+		product, err := productService.CreateProduct(&newProduct)
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, "Error while creating product")
 		}
