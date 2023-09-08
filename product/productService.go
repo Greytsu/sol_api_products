@@ -16,14 +16,14 @@ func NewProductService(productRepo *ProductRepository) *ProductService {
 }
 
 func (productService ProductService) GetAllProducts(companyId string) ([]*models.Product, error) {
-	return productService.productRepository.GetAllProducts(companyId)
+	return productService.productRepository.getAllProducts(companyId)
 }
 
 func (productService ProductService) GetProduct(id string, companyId string) (*dto.ProductDetails, error) {
-	product, err := productService.productRepository.GetProduct(id, companyId)
+	product, err := productService.productRepository.getProduct(id, companyId)
 	return product, err
 }
 
-func (productService ProductService) createProduct(product *models.Product) (*models.Product, error) {
-	return productService.productRepository.CreateProduct(product)
+func (productService ProductService) CreateProduct(product *models.Product) (*models.Product, error) {
+	return productService.productRepository.createProduct(product)
 }

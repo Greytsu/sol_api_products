@@ -28,7 +28,7 @@ func (warehouseRepository *WarehouseRepository) getAllWarehouses(companyId strin
 	return warehouses, nil
 }
 
-func (warehouseRepository *WarehouseRepository) CreateWarehouse(warehouse *models.Warehouse) (*models.Warehouse, error) {
+func (warehouseRepository *WarehouseRepository) createWarehouse(warehouse *models.Warehouse) (*models.Warehouse, error) {
 	warehouseRepository.Lock()
 	defer warehouseRepository.Unlock()
 	err := warehouse.Insert(context.Background(), warehouseRepository.db, boil.Infer())
