@@ -22,7 +22,6 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 }
 
 func (productRepository *ProductRepository) GetAllProducts(companyId string) ([]*models.Product, error) {
-
 	products, err := models.Products(qm.Where("company_id=?", companyId)).All(context.Background(), productRepository.db)
 	if err != nil {
 		return nil, err
