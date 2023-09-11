@@ -52,3 +52,14 @@ func (productRepository *ProductRepository) createProduct(product *models.Produc
 	err := product.Insert(context.Background(), productRepository.db, boil.Infer())
 	return product, err
 }
+
+func (productRepository *ProductRepository) deleteProduct(id int, companyId string) error {
+	productRepository.Lock()
+	defer productRepository.Unlock()
+	product, err := models.Products(qm.Load(qm.Rels(models.ProductRels.FKProductVariants, models.VariantRels.FKVariantStocks)), qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), productRepository.db)
+	if err != nil {
+		return err
+	}
+	product.Delete(context.Background(), productRepository.db)
+	return nil
+}

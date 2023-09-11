@@ -30,3 +30,7 @@ func (productService ProductService) GetProduct(id string, companyId string) (*d
 func (productService ProductService) CreateProduct(product *models.Product) (*models.Product, error) {
 	return productService.productRepository.createProduct(product)
 }
+
+func (productService ProductService) DeleteProduct(id int, companyId string) error {
+	return productService.productRepository.deleteProduct(id, companyId)
+}

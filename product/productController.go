@@ -14,6 +14,7 @@ func RegisterProductRoutes(router *gin.Engine, productService *ProductService, v
 	router.GET("/products/:id", getProduct(productService))
 	router.POST("/products", postProduct(productService))
 	router.POST("/products/:productId/variants", postVariant(variantService))
+	router.DELETE("/products/:id", deleteProduct(productService))
 }
 
 func getAllProducts(productService *ProductService) gin.HandlerFunc {
@@ -76,5 +77,23 @@ func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusOK, product)
+	}
+}
+
+func deleteProduct(productService *ProductService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyId := c.Query("company_id")
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid id")
+		}
+
+		err = productService.DeleteProduct(id, companyId)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "Error while creating product")
+			return
+		}
+		c.IndentedJSON(http.StatusNoContent, "")
 	}
 }
