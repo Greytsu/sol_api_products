@@ -26,11 +26,11 @@ import (
 type Product struct {
 	ID         int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CompanyID  int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
+	Reference  string    `boil:"reference" json:"reference" toml:"reference" yaml:"reference"`
 	Name       string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Type       string    `boil:"type" json:"type" toml:"type" yaml:"type"`
 	CreateTime time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    null.Bool `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted    null.Bool `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted,omitempty"`
 
 	R *productR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L productL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -39,16 +39,16 @@ type Product struct {
 var ProductColumns = struct {
 	ID         string
 	CompanyID  string
+	Reference  string
 	Name       string
-	Type       string
 	CreateTime string
 	UpdateTime string
 	Deleted    string
 }{
 	ID:         "id",
 	CompanyID:  "company_id",
+	Reference:  "reference",
 	Name:       "name",
-	Type:       "type",
 	CreateTime: "create_time",
 	UpdateTime: "update_time",
 	Deleted:    "deleted",
@@ -57,16 +57,16 @@ var ProductColumns = struct {
 var ProductTableColumns = struct {
 	ID         string
 	CompanyID  string
+	Reference  string
 	Name       string
-	Type       string
 	CreateTime string
 	UpdateTime string
 	Deleted    string
 }{
 	ID:         "product.id",
 	CompanyID:  "product.company_id",
+	Reference:  "product.reference",
 	Name:       "product.name",
-	Type:       "product.type",
 	CreateTime: "product.create_time",
 	UpdateTime: "product.update_time",
 	Deleted:    "product.deleted",
@@ -77,16 +77,16 @@ var ProductTableColumns = struct {
 var ProductWhere = struct {
 	ID         whereHelperint
 	CompanyID  whereHelperint
+	Reference  whereHelperstring
 	Name       whereHelperstring
-	Type       whereHelperstring
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
 	Deleted    whereHelpernull_Bool
 }{
 	ID:         whereHelperint{field: "[products].[product].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[product].[company_id]"},
+	Reference:  whereHelperstring{field: "[products].[product].[reference]"},
 	Name:       whereHelperstring{field: "[products].[product].[name]"},
-	Type:       whereHelperstring{field: "[products].[product].[type]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[product].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[product].[update_time]"},
 	Deleted:    whereHelpernull_Bool{field: "[products].[product].[deleted]"},
@@ -120,8 +120,8 @@ func (r *productR) GetFKProductVariants() VariantSlice {
 type productL struct{}
 
 var (
-	productAllColumns            = []string{"id", "company_id", "name", "type", "create_time", "update_time", "deleted"}
-	productColumnsWithoutDefault = []string{"company_id", "name", "type"}
+	productAllColumns            = []string{"id", "company_id", "reference", "name", "create_time", "update_time", "deleted"}
+	productColumnsWithoutDefault = []string{"company_id", "reference", "name"}
 	productColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
 	productPrimaryKeyColumns     = []string{"id"}
 	productGeneratedColumns      = []string{"id"}

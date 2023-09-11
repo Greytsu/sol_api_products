@@ -24,16 +24,17 @@ import (
 
 // Variant is an object representing the database table.
 type Variant struct {
-	ID            int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CompanyID     int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
-	Name          string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	StockTracking bool      `boil:"stock_tracking" json:"stock_tracking" toml:"stock_tracking" yaml:"stock_tracking"`
-	PurchasePrice float64   `boil:"purchase_price" json:"purchase_price" toml:"purchase_price" yaml:"purchase_price"`
-	SellingPrice  float64   `boil:"selling_price" json:"selling_price" toml:"selling_price" yaml:"selling_price"`
-	CreateTime    time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
-	UpdateTime    time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted       null.Bool `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
-	FKProductID   int       `boil:"fk_product_id" json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
+	ID            int          `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CompanyID     int          `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
+	Reference     string       `boil:"reference" json:"reference" toml:"reference" yaml:"reference"`
+	Name          string       `boil:"name" json:"name" toml:"name" yaml:"name"`
+	StockTracking bool         `boil:"stock_tracking" json:"stock_tracking" toml:"stock_tracking" yaml:"stock_tracking"`
+	PurchasePrice null.Float64 `boil:"purchase_price" json:"purchase_price,omitempty" toml:"purchase_price" yaml:"purchase_price,omitempty"`
+	SellingPrice  null.Float64 `boil:"selling_price" json:"selling_price,omitempty" toml:"selling_price" yaml:"selling_price,omitempty"`
+	CreateTime    time.Time    `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
+	UpdateTime    time.Time    `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
+	Deleted       null.Bool    `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted,omitempty"`
+	FKProductID   int          `boil:"fk_product_id" json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
 
 	R *variantR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L variantL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,6 +43,7 @@ type Variant struct {
 var VariantColumns = struct {
 	ID            string
 	CompanyID     string
+	Reference     string
 	Name          string
 	StockTracking string
 	PurchasePrice string
@@ -53,6 +55,7 @@ var VariantColumns = struct {
 }{
 	ID:            "id",
 	CompanyID:     "company_id",
+	Reference:     "reference",
 	Name:          "name",
 	StockTracking: "stock_tracking",
 	PurchasePrice: "purchase_price",
@@ -66,6 +69,7 @@ var VariantColumns = struct {
 var VariantTableColumns = struct {
 	ID            string
 	CompanyID     string
+	Reference     string
 	Name          string
 	StockTracking string
 	PurchasePrice string
@@ -77,6 +81,7 @@ var VariantTableColumns = struct {
 }{
 	ID:            "variant.id",
 	CompanyID:     "variant.company_id",
+	Reference:     "variant.reference",
 	Name:          "variant.name",
 	StockTracking: "variant.stock_tracking",
 	PurchasePrice: "variant.purchase_price",
@@ -98,28 +103,34 @@ func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
-type whereHelperfloat64 struct{ field string }
+type whereHelpernull_Float64 struct{ field string }
 
-func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+func (w whereHelpernull_Float64) EQ(x null.Float64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
 }
-func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
+func (w whereHelpernull_Float64) NEQ(x null.Float64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Float64) LT(x null.Float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Float64) LTE(x null.Float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
+func (w whereHelpernull_Float64) GT(x null.Float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Float64) GTE(x null.Float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
-func (w whereHelperfloat64) IN(slice []float64) qm.QueryMod {
+func (w whereHelpernull_Float64) IN(slice []float64) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
+func (w whereHelpernull_Float64) NIN(slice []float64) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
@@ -127,13 +138,17 @@ func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+func (w whereHelpernull_Float64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Float64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var VariantWhere = struct {
 	ID            whereHelperint
 	CompanyID     whereHelperint
+	Reference     whereHelperstring
 	Name          whereHelperstring
 	StockTracking whereHelperbool
-	PurchasePrice whereHelperfloat64
-	SellingPrice  whereHelperfloat64
+	PurchasePrice whereHelpernull_Float64
+	SellingPrice  whereHelpernull_Float64
 	CreateTime    whereHelpertime_Time
 	UpdateTime    whereHelpertime_Time
 	Deleted       whereHelpernull_Bool
@@ -141,10 +156,11 @@ var VariantWhere = struct {
 }{
 	ID:            whereHelperint{field: "[products].[variant].[id]"},
 	CompanyID:     whereHelperint{field: "[products].[variant].[company_id]"},
+	Reference:     whereHelperstring{field: "[products].[variant].[reference]"},
 	Name:          whereHelperstring{field: "[products].[variant].[name]"},
 	StockTracking: whereHelperbool{field: "[products].[variant].[stock_tracking]"},
-	PurchasePrice: whereHelperfloat64{field: "[products].[variant].[purchase_price]"},
-	SellingPrice:  whereHelperfloat64{field: "[products].[variant].[selling_price]"},
+	PurchasePrice: whereHelpernull_Float64{field: "[products].[variant].[purchase_price]"},
+	SellingPrice:  whereHelpernull_Float64{field: "[products].[variant].[selling_price]"},
 	CreateTime:    whereHelpertime_Time{field: "[products].[variant].[create_time]"},
 	UpdateTime:    whereHelpertime_Time{field: "[products].[variant].[update_time]"},
 	Deleted:       whereHelpernull_Bool{field: "[products].[variant].[deleted]"},
@@ -199,8 +215,8 @@ func (r *variantR) GetFKVariantStocks() StockSlice {
 type variantL struct{}
 
 var (
-	variantAllColumns            = []string{"id", "company_id", "name", "stock_tracking", "purchase_price", "selling_price", "create_time", "update_time", "deleted", "fk_product_id"}
-	variantColumnsWithoutDefault = []string{"company_id", "name", "stock_tracking", "purchase_price", "selling_price", "fk_product_id"}
+	variantAllColumns            = []string{"id", "company_id", "reference", "name", "stock_tracking", "purchase_price", "selling_price", "create_time", "update_time", "deleted", "fk_product_id"}
+	variantColumnsWithoutDefault = []string{"company_id", "reference", "name", "stock_tracking", "purchase_price", "selling_price", "fk_product_id"}
 	variantColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
 	variantPrimaryKeyColumns     = []string{"id"}
 	variantGeneratedColumns      = []string{"id"}

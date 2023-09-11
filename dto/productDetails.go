@@ -9,12 +9,12 @@ import (
 type ProductDetails struct {
 	ID         int            `json:"id" toml:"id" yaml:"id"`
 	CompanyID  int            `json:"company_id" toml:"company_id" yaml:"company_id"`
+	Reference  string         `json:"reference" toml:"reference" yaml:"reference"`
 	Name       string         `json:"name" toml:"name" yaml:"name"`
-	Type       string         `json:"type" toml:"type" yaml:"type"`
 	Variants   []VariantStock `json:"variants" toml:"variants" yaml:"variants"`
 	CreateTime time.Time      `json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time      `json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    null.Bool      `json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted    null.Bool      `json:"-" toml:"deleted" yaml:"deleted,omitempty"`
 }
 
 func NewProductDetails(product *models.Product) *ProductDetails {
@@ -22,7 +22,6 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 	productVariants.ID = product.ID
 	productVariants.CompanyID = product.CompanyID
 	productVariants.Name = product.Name
-	productVariants.Type = product.Type
 	productVariants.CreateTime = product.CreateTime
 	productVariants.UpdateTime = product.UpdateTime
 	productVariants.Deleted = product.Deleted

@@ -26,12 +26,12 @@ import (
 type Stock struct {
 	ID            int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CompanyID     int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
-	FKWarehouseID null.Int  `boil:"fk_warehouse_id" json:"fk_warehouse_id,omitempty" toml:"fk_warehouse_id" yaml:"fk_warehouse_id,omitempty"`
-	FKVariantID   null.Int  `boil:"fk_variant_id" json:"fk_variant_id,omitempty" toml:"fk_variant_id" yaml:"fk_variant_id,omitempty"`
+	FKWarehouseID null.Int  `boil:"fk_warehouse_id" json:"warehouse_id,omitempty" toml:"fk_warehouse_id" yaml:"fk_warehouse_id,omitempty"`
+	FKVariantID   null.Int  `boil:"fk_variant_id" json:"-" toml:"fk_variant_id" yaml:"fk_variant_id,omitempty"`
 	Quantity      int       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
 	CreateTime    time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime    time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted       null.Bool `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted       null.Bool `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted,omitempty"`
 
 	R *stockR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L stockL  `boil:"-" json:"-" toml:"-" yaml:"-"`
