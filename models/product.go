@@ -29,7 +29,6 @@ type Product struct {
 	Name       string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	CreateTime time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    bool      `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *productR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L productL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,7 +41,6 @@ var ProductColumns = struct {
 	Name       string
 	CreateTime string
 	UpdateTime string
-	Deleted    string
 }{
 	ID:         "id",
 	CompanyID:  "company_id",
@@ -50,7 +48,6 @@ var ProductColumns = struct {
 	Name:       "name",
 	CreateTime: "create_time",
 	UpdateTime: "update_time",
-	Deleted:    "deleted",
 }
 
 var ProductTableColumns = struct {
@@ -60,7 +57,6 @@ var ProductTableColumns = struct {
 	Name       string
 	CreateTime string
 	UpdateTime string
-	Deleted    string
 }{
 	ID:         "product.id",
 	CompanyID:  "product.company_id",
@@ -68,7 +64,6 @@ var ProductTableColumns = struct {
 	Name:       "product.name",
 	CreateTime: "product.create_time",
 	UpdateTime: "product.update_time",
-	Deleted:    "product.deleted",
 }
 
 // Generated where
@@ -80,7 +75,6 @@ var ProductWhere = struct {
 	Name       whereHelperstring
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
-	Deleted    whereHelperbool
 }{
 	ID:         whereHelperint{field: "[products].[product].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[product].[company_id]"},
@@ -88,7 +82,6 @@ var ProductWhere = struct {
 	Name:       whereHelperstring{field: "[products].[product].[name]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[product].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[product].[update_time]"},
-	Deleted:    whereHelperbool{field: "[products].[product].[deleted]"},
 }
 
 // ProductRels is where relationship names are stored.
@@ -119,9 +112,9 @@ func (r *productR) GetFKProductVariants() VariantSlice {
 type productL struct{}
 
 var (
-	productAllColumns            = []string{"id", "company_id", "reference", "name", "create_time", "update_time", "deleted"}
+	productAllColumns            = []string{"id", "company_id", "reference", "name", "create_time", "update_time"}
 	productColumnsWithoutDefault = []string{"company_id", "reference", "name"}
-	productColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
+	productColumnsWithDefault    = []string{"id", "create_time", "update_time"}
 	productPrimaryKeyColumns     = []string{"id"}
 	productGeneratedColumns      = []string{"id"}
 )

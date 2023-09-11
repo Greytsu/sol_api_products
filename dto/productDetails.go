@@ -13,7 +13,6 @@ type ProductDetails struct {
 	Variants   []VariantStock `json:"variants" toml:"variants" yaml:"variants"`
 	CreateTime time.Time      `json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time      `json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    bool           `json:"-" toml:"deleted" yaml:"deleted,omitempty"`
 }
 
 func NewProductDetails(product *models.Product) *ProductDetails {
@@ -23,7 +22,6 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 	productVariants.Name = product.Name
 	productVariants.CreateTime = product.CreateTime
 	productVariants.UpdateTime = product.UpdateTime
-	productVariants.Deleted = product.Deleted
 
 	var variantsStock []VariantStock
 	for _, value := range product.R.GetFKProductVariants() {
@@ -36,7 +34,6 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 		variant.SellingPrice = value.SellingPrice
 		variant.CreateTime = value.CreateTime
 		variant.UpdateTime = value.UpdateTime
-		variant.Deleted = value.Deleted
 		variant.FKProductID = value.FKProductID
 		stocks := value.R.GetFKVariantStocks()
 		if stocks != nil {

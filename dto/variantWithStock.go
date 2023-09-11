@@ -15,7 +15,6 @@ type VariantStock struct {
 	SellingPrice  null.Float64 `json:"selling_price,omitempty" toml:"selling_price" yaml:"selling_price,omitempty"`
 	CreateTime    time.Time    `json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime    time.Time    `json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted       bool         `json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
 	FKProductID   int          `json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
 	Stock         models.Stock `json:"stock" toml:"stock" yaml:"stock"`
 }

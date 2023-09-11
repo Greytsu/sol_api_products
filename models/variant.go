@@ -33,7 +33,6 @@ type Variant struct {
 	SellingPrice  null.Float64 `boil:"selling_price" json:"selling_price,omitempty" toml:"selling_price" yaml:"selling_price,omitempty"`
 	CreateTime    time.Time    `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime    time.Time    `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted       bool         `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 	FKProductID   int          `boil:"fk_product_id" json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
 
 	R *variantR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -50,7 +49,6 @@ var VariantColumns = struct {
 	SellingPrice  string
 	CreateTime    string
 	UpdateTime    string
-	Deleted       string
 	FKProductID   string
 }{
 	ID:            "id",
@@ -62,7 +60,6 @@ var VariantColumns = struct {
 	SellingPrice:  "selling_price",
 	CreateTime:    "create_time",
 	UpdateTime:    "update_time",
-	Deleted:       "deleted",
 	FKProductID:   "fk_product_id",
 }
 
@@ -76,7 +73,6 @@ var VariantTableColumns = struct {
 	SellingPrice  string
 	CreateTime    string
 	UpdateTime    string
-	Deleted       string
 	FKProductID   string
 }{
 	ID:            "variant.id",
@@ -88,11 +84,19 @@ var VariantTableColumns = struct {
 	SellingPrice:  "variant.selling_price",
 	CreateTime:    "variant.create_time",
 	UpdateTime:    "variant.update_time",
-	Deleted:       "variant.deleted",
 	FKProductID:   "variant.fk_product_id",
 }
 
 // Generated where
+
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 type whereHelpernull_Float64 struct{ field string }
 
@@ -142,7 +146,6 @@ var VariantWhere = struct {
 	SellingPrice  whereHelpernull_Float64
 	CreateTime    whereHelpertime_Time
 	UpdateTime    whereHelpertime_Time
-	Deleted       whereHelperbool
 	FKProductID   whereHelperint
 }{
 	ID:            whereHelperint{field: "[products].[variant].[id]"},
@@ -154,7 +157,6 @@ var VariantWhere = struct {
 	SellingPrice:  whereHelpernull_Float64{field: "[products].[variant].[selling_price]"},
 	CreateTime:    whereHelpertime_Time{field: "[products].[variant].[create_time]"},
 	UpdateTime:    whereHelpertime_Time{field: "[products].[variant].[update_time]"},
-	Deleted:       whereHelperbool{field: "[products].[variant].[deleted]"},
 	FKProductID:   whereHelperint{field: "[products].[variant].[fk_product_id]"},
 }
 
@@ -206,9 +208,9 @@ func (r *variantR) GetFKVariantStocks() StockSlice {
 type variantL struct{}
 
 var (
-	variantAllColumns            = []string{"id", "company_id", "reference", "name", "stock_tracking", "purchase_price", "selling_price", "create_time", "update_time", "deleted", "fk_product_id"}
+	variantAllColumns            = []string{"id", "company_id", "reference", "name", "stock_tracking", "purchase_price", "selling_price", "create_time", "update_time", "fk_product_id"}
 	variantColumnsWithoutDefault = []string{"company_id", "reference", "name", "stock_tracking", "purchase_price", "selling_price", "fk_product_id"}
-	variantColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
+	variantColumnsWithDefault    = []string{"id", "create_time", "update_time"}
 	variantPrimaryKeyColumns     = []string{"id"}
 	variantGeneratedColumns      = []string{"id"}
 )

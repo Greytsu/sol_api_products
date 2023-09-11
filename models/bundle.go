@@ -30,7 +30,6 @@ type Bundle struct {
 	Price      types.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
 	CreateTime time.Time     `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time     `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    bool          `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *bundleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bundleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -43,7 +42,6 @@ var BundleColumns = struct {
 	Price      string
 	CreateTime string
 	UpdateTime string
-	Deleted    string
 }{
 	ID:         "id",
 	CompanyID:  "company_id",
@@ -51,7 +49,6 @@ var BundleColumns = struct {
 	Price:      "price",
 	CreateTime: "create_time",
 	UpdateTime: "update_time",
-	Deleted:    "deleted",
 }
 
 var BundleTableColumns = struct {
@@ -61,7 +58,6 @@ var BundleTableColumns = struct {
 	Price      string
 	CreateTime string
 	UpdateTime string
-	Deleted    string
 }{
 	ID:         "bundle.id",
 	CompanyID:  "bundle.company_id",
@@ -69,7 +65,6 @@ var BundleTableColumns = struct {
 	Price:      "bundle.price",
 	CreateTime: "bundle.create_time",
 	UpdateTime: "bundle.update_time",
-	Deleted:    "bundle.deleted",
 }
 
 // Generated where
@@ -162,15 +157,6 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelperbool struct{ field string }
-
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var BundleWhere = struct {
 	ID         whereHelperint
 	CompanyID  whereHelperint
@@ -178,7 +164,6 @@ var BundleWhere = struct {
 	Price      whereHelpertypes_Decimal
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
-	Deleted    whereHelperbool
 }{
 	ID:         whereHelperint{field: "[products].[bundle].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[bundle].[company_id]"},
@@ -186,7 +171,6 @@ var BundleWhere = struct {
 	Price:      whereHelpertypes_Decimal{field: "[products].[bundle].[price]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[bundle].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[bundle].[update_time]"},
-	Deleted:    whereHelperbool{field: "[products].[bundle].[deleted]"},
 }
 
 // BundleRels is where relationship names are stored.
@@ -217,9 +201,9 @@ func (r *bundleR) GetFKBundleBundleElements() BundleElementSlice {
 type bundleL struct{}
 
 var (
-	bundleAllColumns            = []string{"id", "company_id", "name", "price", "create_time", "update_time", "deleted"}
+	bundleAllColumns            = []string{"id", "company_id", "name", "price", "create_time", "update_time"}
 	bundleColumnsWithoutDefault = []string{"company_id", "name", "price"}
-	bundleColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
+	bundleColumnsWithDefault    = []string{"id", "create_time", "update_time"}
 	bundlePrimaryKeyColumns     = []string{"id"}
 	bundleGeneratedColumns      = []string{"id"}
 )

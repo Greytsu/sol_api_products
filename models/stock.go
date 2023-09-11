@@ -31,7 +31,6 @@ type Stock struct {
 	Quantity      int       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
 	CreateTime    time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime    time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted       bool      `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *stockR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L stockL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -45,7 +44,6 @@ var StockColumns = struct {
 	Quantity      string
 	CreateTime    string
 	UpdateTime    string
-	Deleted       string
 }{
 	ID:            "id",
 	CompanyID:     "company_id",
@@ -54,7 +52,6 @@ var StockColumns = struct {
 	Quantity:      "quantity",
 	CreateTime:    "create_time",
 	UpdateTime:    "update_time",
-	Deleted:       "deleted",
 }
 
 var StockTableColumns = struct {
@@ -65,7 +62,6 @@ var StockTableColumns = struct {
 	Quantity      string
 	CreateTime    string
 	UpdateTime    string
-	Deleted       string
 }{
 	ID:            "stock.id",
 	CompanyID:     "stock.company_id",
@@ -74,7 +70,6 @@ var StockTableColumns = struct {
 	Quantity:      "stock.quantity",
 	CreateTime:    "stock.create_time",
 	UpdateTime:    "stock.update_time",
-	Deleted:       "stock.deleted",
 }
 
 // Generated where
@@ -87,7 +82,6 @@ var StockWhere = struct {
 	Quantity      whereHelperint
 	CreateTime    whereHelpertime_Time
 	UpdateTime    whereHelpertime_Time
-	Deleted       whereHelperbool
 }{
 	ID:            whereHelperint{field: "[products].[stock].[id]"},
 	CompanyID:     whereHelperint{field: "[products].[stock].[company_id]"},
@@ -96,7 +90,6 @@ var StockWhere = struct {
 	Quantity:      whereHelperint{field: "[products].[stock].[quantity]"},
 	CreateTime:    whereHelpertime_Time{field: "[products].[stock].[create_time]"},
 	UpdateTime:    whereHelpertime_Time{field: "[products].[stock].[update_time]"},
-	Deleted:       whereHelperbool{field: "[products].[stock].[deleted]"},
 }
 
 // StockRels is where relationship names are stored.
@@ -137,9 +130,9 @@ func (r *stockR) GetFKWarehouse() *Warehouse {
 type stockL struct{}
 
 var (
-	stockAllColumns            = []string{"id", "company_id", "fk_warehouse_id", "fk_variant_id", "quantity", "create_time", "update_time", "deleted"}
+	stockAllColumns            = []string{"id", "company_id", "fk_warehouse_id", "fk_variant_id", "quantity", "create_time", "update_time"}
 	stockColumnsWithoutDefault = []string{"company_id", "fk_warehouse_id", "fk_variant_id", "quantity"}
-	stockColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
+	stockColumnsWithDefault    = []string{"id", "create_time", "update_time"}
 	stockPrimaryKeyColumns     = []string{"id"}
 	stockGeneratedColumns      = []string{"id"}
 )

@@ -31,7 +31,6 @@ type BundleElement struct {
 	Quantity    int       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
 	CreateTime  time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime  time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted     bool      `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *bundleElementR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bundleElementL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -45,7 +44,6 @@ var BundleElementColumns = struct {
 	Quantity    string
 	CreateTime  string
 	UpdateTime  string
-	Deleted     string
 }{
 	ID:          "id",
 	CompanyID:   "company_id",
@@ -54,7 +52,6 @@ var BundleElementColumns = struct {
 	Quantity:    "quantity",
 	CreateTime:  "create_time",
 	UpdateTime:  "update_time",
-	Deleted:     "deleted",
 }
 
 var BundleElementTableColumns = struct {
@@ -65,7 +62,6 @@ var BundleElementTableColumns = struct {
 	Quantity    string
 	CreateTime  string
 	UpdateTime  string
-	Deleted     string
 }{
 	ID:          "bundle_element.id",
 	CompanyID:   "bundle_element.company_id",
@@ -74,7 +70,6 @@ var BundleElementTableColumns = struct {
 	Quantity:    "bundle_element.quantity",
 	CreateTime:  "bundle_element.create_time",
 	UpdateTime:  "bundle_element.update_time",
-	Deleted:     "bundle_element.deleted",
 }
 
 // Generated where
@@ -125,7 +120,6 @@ var BundleElementWhere = struct {
 	Quantity    whereHelperint
 	CreateTime  whereHelpertime_Time
 	UpdateTime  whereHelpertime_Time
-	Deleted     whereHelperbool
 }{
 	ID:          whereHelperint{field: "[products].[bundle_element].[id]"},
 	CompanyID:   whereHelperint{field: "[products].[bundle_element].[company_id]"},
@@ -134,7 +128,6 @@ var BundleElementWhere = struct {
 	Quantity:    whereHelperint{field: "[products].[bundle_element].[quantity]"},
 	CreateTime:  whereHelpertime_Time{field: "[products].[bundle_element].[create_time]"},
 	UpdateTime:  whereHelpertime_Time{field: "[products].[bundle_element].[update_time]"},
-	Deleted:     whereHelperbool{field: "[products].[bundle_element].[deleted]"},
 }
 
 // BundleElementRels is where relationship names are stored.
@@ -175,9 +168,9 @@ func (r *bundleElementR) GetFKVariant() *Variant {
 type bundleElementL struct{}
 
 var (
-	bundleElementAllColumns            = []string{"id", "company_id", "fk_bundle_id", "fk_variant_id", "quantity", "create_time", "update_time", "deleted"}
+	bundleElementAllColumns            = []string{"id", "company_id", "fk_bundle_id", "fk_variant_id", "quantity", "create_time", "update_time"}
 	bundleElementColumnsWithoutDefault = []string{"company_id", "fk_bundle_id", "fk_variant_id", "quantity"}
-	bundleElementColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
+	bundleElementColumnsWithDefault    = []string{"id", "create_time", "update_time"}
 	bundleElementPrimaryKeyColumns     = []string{"id"}
 	bundleElementGeneratedColumns      = []string{"id"}
 )

@@ -38,7 +38,6 @@ type Warehouse struct {
 	Email      string      `boil:"email" json:"email" toml:"email" yaml:"email"`
 	CreateTime time.Time   `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time   `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    bool        `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *warehouseR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L warehouseL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -59,7 +58,6 @@ var WarehouseColumns = struct {
 	Email      string
 	CreateTime string
 	UpdateTime string
-	Deleted    string
 }{
 	ID:         "id",
 	CompanyID:  "company_id",
@@ -75,7 +73,6 @@ var WarehouseColumns = struct {
 	Email:      "email",
 	CreateTime: "create_time",
 	UpdateTime: "update_time",
-	Deleted:    "deleted",
 }
 
 var WarehouseTableColumns = struct {
@@ -93,7 +90,6 @@ var WarehouseTableColumns = struct {
 	Email      string
 	CreateTime string
 	UpdateTime string
-	Deleted    string
 }{
 	ID:         "warehouse.id",
 	CompanyID:  "warehouse.company_id",
@@ -109,7 +105,6 @@ var WarehouseTableColumns = struct {
 	Email:      "warehouse.email",
 	CreateTime: "warehouse.create_time",
 	UpdateTime: "warehouse.update_time",
-	Deleted:    "warehouse.deleted",
 }
 
 // Generated where
@@ -167,7 +162,6 @@ var WarehouseWhere = struct {
 	Email      whereHelperstring
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
-	Deleted    whereHelperbool
 }{
 	ID:         whereHelperint{field: "[products].[warehouse].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[warehouse].[company_id]"},
@@ -183,7 +177,6 @@ var WarehouseWhere = struct {
 	Email:      whereHelperstring{field: "[products].[warehouse].[email]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[warehouse].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[warehouse].[update_time]"},
-	Deleted:    whereHelperbool{field: "[products].[warehouse].[deleted]"},
 }
 
 // WarehouseRels is where relationship names are stored.
@@ -214,9 +207,9 @@ func (r *warehouseR) GetFKWarehouseStocks() StockSlice {
 type warehouseL struct{}
 
 var (
-	warehouseAllColumns            = []string{"id", "company_id", "name", "address", "complement", "zip", "city", "region", "country", "manager", "phone", "email", "create_time", "update_time", "deleted"}
+	warehouseAllColumns            = []string{"id", "company_id", "name", "address", "complement", "zip", "city", "region", "country", "manager", "phone", "email", "create_time", "update_time"}
 	warehouseColumnsWithoutDefault = []string{"company_id", "name", "address", "complement", "zip", "city", "region", "country", "manager", "phone", "email"}
-	warehouseColumnsWithDefault    = []string{"id", "create_time", "update_time", "deleted"}
+	warehouseColumnsWithDefault    = []string{"id", "create_time", "update_time"}
 	warehousePrimaryKeyColumns     = []string{"id"}
 	warehouseGeneratedColumns      = []string{"id"}
 )
