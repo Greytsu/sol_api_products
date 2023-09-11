@@ -31,7 +31,7 @@ type BundleElement struct {
 	Quantity    int       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
 	CreateTime  time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime  time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted     null.Bool `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted     bool      `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *bundleElementR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bundleElementL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -125,7 +125,7 @@ var BundleElementWhere = struct {
 	Quantity    whereHelperint
 	CreateTime  whereHelpertime_Time
 	UpdateTime  whereHelpertime_Time
-	Deleted     whereHelpernull_Bool
+	Deleted     whereHelperbool
 }{
 	ID:          whereHelperint{field: "[products].[bundle_element].[id]"},
 	CompanyID:   whereHelperint{field: "[products].[bundle_element].[company_id]"},
@@ -134,7 +134,7 @@ var BundleElementWhere = struct {
 	Quantity:    whereHelperint{field: "[products].[bundle_element].[quantity]"},
 	CreateTime:  whereHelpertime_Time{field: "[products].[bundle_element].[create_time]"},
 	UpdateTime:  whereHelpertime_Time{field: "[products].[bundle_element].[update_time]"},
-	Deleted:     whereHelpernull_Bool{field: "[products].[bundle_element].[deleted]"},
+	Deleted:     whereHelperbool{field: "[products].[bundle_element].[deleted]"},
 }
 
 // BundleElementRels is where relationship names are stored.

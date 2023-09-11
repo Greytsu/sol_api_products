@@ -38,7 +38,7 @@ type Warehouse struct {
 	Email      string      `boil:"email" json:"email" toml:"email" yaml:"email"`
 	CreateTime time.Time   `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time   `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    null.Bool   `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted    bool        `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *warehouseR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L warehouseL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -167,7 +167,7 @@ var WarehouseWhere = struct {
 	Email      whereHelperstring
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
-	Deleted    whereHelpernull_Bool
+	Deleted    whereHelperbool
 }{
 	ID:         whereHelperint{field: "[products].[warehouse].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[warehouse].[company_id]"},
@@ -183,7 +183,7 @@ var WarehouseWhere = struct {
 	Email:      whereHelperstring{field: "[products].[warehouse].[email]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[warehouse].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[warehouse].[update_time]"},
-	Deleted:    whereHelpernull_Bool{field: "[products].[warehouse].[deleted]"},
+	Deleted:    whereHelperbool{field: "[products].[warehouse].[deleted]"},
 }
 
 // WarehouseRels is where relationship names are stored.

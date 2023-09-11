@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -31,7 +30,7 @@ type Bundle struct {
 	Price      types.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
 	CreateTime time.Time     `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time     `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    null.Bool     `boil:"deleted" json:"deleted,omitempty" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted    bool          `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *bundleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bundleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -163,29 +162,14 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpernull_Bool struct{ field string }
+type whereHelperbool struct{ field string }
 
-func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var BundleWhere = struct {
 	ID         whereHelperint
@@ -194,7 +178,7 @@ var BundleWhere = struct {
 	Price      whereHelpertypes_Decimal
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
-	Deleted    whereHelpernull_Bool
+	Deleted    whereHelperbool
 }{
 	ID:         whereHelperint{field: "[products].[bundle].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[bundle].[company_id]"},
@@ -202,7 +186,7 @@ var BundleWhere = struct {
 	Price:      whereHelpertypes_Decimal{field: "[products].[bundle].[price]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[bundle].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[bundle].[update_time]"},
-	Deleted:    whereHelpernull_Bool{field: "[products].[bundle].[deleted]"},
+	Deleted:    whereHelperbool{field: "[products].[bundle].[deleted]"},
 }
 
 // BundleRels is where relationship names are stored.

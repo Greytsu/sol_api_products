@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -30,7 +29,7 @@ type Product struct {
 	Name       string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	CreateTime time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    null.Bool `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted    bool      `boil:"deleted" json:"-" toml:"deleted" yaml:"deleted"`
 
 	R *productR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L productL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -81,7 +80,7 @@ var ProductWhere = struct {
 	Name       whereHelperstring
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
-	Deleted    whereHelpernull_Bool
+	Deleted    whereHelperbool
 }{
 	ID:         whereHelperint{field: "[products].[product].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[product].[company_id]"},
@@ -89,7 +88,7 @@ var ProductWhere = struct {
 	Name:       whereHelperstring{field: "[products].[product].[name]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[product].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[product].[update_time]"},
-	Deleted:    whereHelpernull_Bool{field: "[products].[product].[deleted]"},
+	Deleted:    whereHelperbool{field: "[products].[product].[deleted]"},
 }
 
 // ProductRels is where relationship names are stored.

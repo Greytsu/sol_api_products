@@ -2,7 +2,6 @@ package dto
 
 import (
 	"fr/greytsu/sol_api_products/models"
-	"github.com/volatiletech/null/v8"
 	"time"
 )
 
@@ -14,7 +13,7 @@ type ProductDetails struct {
 	Variants   []VariantStock `json:"variants" toml:"variants" yaml:"variants"`
 	CreateTime time.Time      `json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime time.Time      `json:"update_time" toml:"update_time" yaml:"update_time"`
-	Deleted    null.Bool      `json:"-" toml:"deleted" yaml:"deleted,omitempty"`
+	Deleted    bool           `json:"-" toml:"deleted" yaml:"deleted,omitempty"`
 }
 
 func NewProductDetails(product *models.Product) *ProductDetails {
