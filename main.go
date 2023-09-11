@@ -43,7 +43,7 @@ func main() {
 	product.RegisterProductRoutes(router, productService, variantService)
 	warehouse.RegisterProductRoutes(router, warehouseService)
 
-	err = router.Run(":8080")
+	err = router.Run()
 	if err != nil {
 		log.Fatalf("Failed to start the server: %s", err.Error())
 	}
