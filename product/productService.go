@@ -15,7 +15,10 @@ func NewProductService(productRepo *ProductRepository) *ProductService {
 	}
 }
 
-func (productService ProductService) GetAllProducts(companyId string) ([]*models.Product, error) {
+func (productService ProductService) GetAllProducts(name string, companyId string) ([]*models.Product, error) {
+	if name != "" {
+		return productService.productRepository.getProductsLike(name, companyId)
+	}
 	return productService.productRepository.getAllProducts(companyId)
 }
 

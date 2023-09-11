@@ -29,6 +29,14 @@ func (productRepository *ProductRepository) getAllProducts(companyId string) ([]
 	return products, nil
 }
 
+func (productRepository *ProductRepository) getProductsLike(name string, companyId string) ([]*models.Product, error) {
+	products, err := models.Products(qm.Where("company_id=?", companyId), qm.Where("reference like ? or name like ?", "%"+name+"%", "%"+name+"%")).All(context.Background(), productRepository.db)
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
 func (productRepository *ProductRepository) getProduct(id string, companyId string) (*dto.ProductDetails, error) {
 	product, err := models.Products(qm.Load(qm.Rels(models.ProductRels.FKProductVariants, models.VariantRels.FKVariantStocks)), qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), productRepository.db)
 	if err != nil {

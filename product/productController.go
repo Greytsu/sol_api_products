@@ -19,8 +19,9 @@ func RegisterProductRoutes(router *gin.Engine, productService *ProductService, v
 func getAllProducts(productService *ProductService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		companyId := c.Query("company_id")
+		name := c.Query("name")
 
-		products, err := productService.GetAllProducts(companyId)
+		products, err := productService.GetAllProducts(name, companyId)
 		if err != nil {
 			log.Printf("Error: %s", err.Error())
 			c.IndentedJSON(http.StatusInternalServerError, "error")
