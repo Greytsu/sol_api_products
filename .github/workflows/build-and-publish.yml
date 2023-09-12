@@ -31,4 +31,4 @@ jobs:
         run: |
           docker build -t sol_api_products:latest .
           docker tag sol_api_products:latest greytsu/sol_api_products:latest
-          docker push greytsu/sol_api_products  :latest
+          docker push greytsu/sol_api_products:latest
