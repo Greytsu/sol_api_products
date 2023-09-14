@@ -4,7 +4,6 @@ import (
 	"fr/greytsu/sol_api_products/models"
 	"fr/greytsu/sol_api_products/variant"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -24,8 +23,7 @@ func getAllProducts(productService *ProductService) gin.HandlerFunc {
 
 		products, err := productService.GetAllProducts(name, companyId)
 		if err != nil {
-			log.Printf("Error: %s", err.Error())
-			c.IndentedJSON(http.StatusInternalServerError, "error")
+			c.IndentedJSON(http.StatusInternalServerError, "Internal error, please try later")
 			return
 		}
 		c.IndentedJSON(http.StatusOK, products)
@@ -39,8 +37,11 @@ func getProduct(productService *ProductService) gin.HandlerFunc {
 
 		product, err := productService.GetProduct(id, companyId)
 		if err != nil {
-			log.Printf("Error: %s", err.Error())
-			c.IndentedJSON(http.StatusInternalServerError, "error")
+			if err.Error() == "sql: no rows in result set" {
+				c.IndentedJSON(http.StatusNotFound, "Product not found")
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Internal error, please try later")
 			return
 		}
 		c.IndentedJSON(http.StatusOK, product)
@@ -73,7 +74,7 @@ func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 		}
 		product, err := variantService.CreateVariant(&newVariant)
 		if err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, "Error while creating product")
+			c.IndentedJSON(http.StatusInternalServerError, "Error while creating variant")
 			return
 		}
 		c.IndentedJSON(http.StatusOK, product)
@@ -91,7 +92,11 @@ func deleteProduct(productService *ProductService) gin.HandlerFunc {
 
 		err = productService.DeleteProduct(id, companyId)
 		if err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, "Error while creating product")
+			if err.Error() == "sql: no rows in result set" {
+				c.IndentedJSON(http.StatusNotFound, "Product not found")
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Error while deleting product")
 			return
 		}
 		c.IndentedJSON(http.StatusNoContent, "")
