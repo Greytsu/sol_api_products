@@ -6,12 +6,14 @@ import (
 	"fr/greytsu/sol_api_products/product"
 	"fr/greytsu/sol_api_products/variant"
 	"fr/greytsu/sol_api_products/warehouse"
+
 	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/rs/zerolog/log"
 )
 
 func init() {
 	config.LoadEnvironmentVariables()
+	config.SetupLogger()
 }
 
 func main() {
@@ -20,8 +22,7 @@ func main() {
 	databaseCon := database.DatabaseCon{}
 	err := databaseCon.ConnectToDatabaseWithRetry()
 	if err != nil {
-		log.Println(err.Error())
-		log.Fatal("Exiting")
+		log.Fatal().Err(err).Msg("Failed to connect to the database. Exiting")
 	}
 
 	//Init product
@@ -45,6 +46,6 @@ func main() {
 
 	err = router.Run()
 	if err != nil {
-		log.Fatalf("Failed to start the server: %s", err.Error())
+		log.Fatal().Err(err).Msg("Failed to start the server. Exiting")
 	}
 }
