@@ -5,17 +5,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
 )
 
-func RegisterProductRoutes(router *gin.Engine, warehouseService *WarehouseService) {
-	router.GET("/warehouses", getAllWarehouses(warehouseService))
-	router.POST("/warehouses", postWarehouse(warehouseService))
+func RegisterProductRoutes(routerGroup *gin.RouterGroup, warehouseService *WarehouseService) {
+	routerGroup.GET("/warehouses", getAllWarehouses(warehouseService))
+	routerGroup.POST("/warehouses", postWarehouse(warehouseService))
 }
 
 func getAllWarehouses(warehouseService *WarehouseService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		companyId := c.Query("company_id")
-
+		companyId := c.Request.Header["Company_id"][0]
 		warehouses, err := warehouseService.GetAllWarehouses(companyId)
 		if err != nil {
 			log.Printf("Error: %s", err.Error())
@@ -28,11 +28,19 @@ func getAllWarehouses(warehouseService *WarehouseService) gin.HandlerFunc {
 
 func postWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+
 		var newWarehouse models.Warehouse
 		if err := c.BindJSON(&newWarehouse); err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
 			return
 		}
+		newWarehouse.CompanyID = companyId
 		product, err := warehouseService.CreateWarehouse(&newWarehouse)
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, "Error while creating warehouse")

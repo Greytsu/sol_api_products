@@ -33,7 +33,7 @@ type Variant struct {
 	SellingPrice  null.Float64 `boil:"selling_price" json:"selling_price,omitempty" toml:"selling_price" yaml:"selling_price,omitempty"`
 	CreateTime    time.Time    `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime    time.Time    `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	FKProductID   int          `boil:"fk_product_id" json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
+	FKProductID   int          `boil:"fk_product_id" json:"product_id" toml:"fk_product_id" yaml:"fk_product_id"`
 
 	R *variantR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L variantL  `boil:"-" json:"-" toml:"-" yaml:"-"`

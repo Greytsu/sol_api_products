@@ -39,10 +39,11 @@ func main() {
 
 	//Create the Gin router
 	router := gin.Default()
+	v1 := router.Group("/api/v1")
 
 	//Routes
-	product.RegisterProductRoutes(router, productService, variantService)
-	warehouse.RegisterProductRoutes(router, warehouseService)
+	product.RegisterProductRoutes(v1, productService, variantService)
+	warehouse.RegisterProductRoutes(v1, warehouseService)
 
 	err = router.Run()
 	if err != nil {
