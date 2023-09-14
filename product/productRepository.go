@@ -26,6 +26,9 @@ func (productRepository *ProductRepository) GetAllProducts(companyId string) ([]
 	if err != nil {
 		return nil, err
 	}
+	if products == nil {
+		products = []*models.Product{}
+	}
 	return products, nil
 }
 
@@ -33,6 +36,9 @@ func (productRepository *ProductRepository) GetProductsLike(name string, company
 	products, err := models.Products(qm.Where("company_id=?", companyId), qm.Where("reference like ? or name like ?", "%"+name+"%", "%"+name+"%")).All(context.Background(), productRepository.db)
 	if err != nil {
 		return nil, err
+	}
+	if products == nil {
+		products = []*models.Product{}
 	}
 	return products, nil
 }
