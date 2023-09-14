@@ -6,10 +6,18 @@ import (
 )
 
 type ProductService struct {
-	productRepository *ProductRepository
+	productRepository productRepository
 }
 
-func NewProductService(productRepo *ProductRepository) *ProductService {
+type productRepository interface {
+	GetAllProducts(companyId string) ([]*models.Product, error)
+	GetProductsLike(name string, companyId string) ([]*models.Product, error)
+	GetProduct(id string, companyId string) (*dto.ProductDetails, error)
+	CreateProduct(product *models.Product) (*models.Product, error)
+	DeleteProduct(id int, companyId string) error
+}
+
+func NewProductService(productRepo productRepository) *ProductService {
 	return &ProductService{
 		productRepository: productRepo,
 	}
@@ -17,20 +25,20 @@ func NewProductService(productRepo *ProductRepository) *ProductService {
 
 func (productService ProductService) GetAllProducts(name string, companyId string) ([]*models.Product, error) {
 	if name != "" {
-		return productService.productRepository.getProductsLike(name, companyId)
+		return productService.productRepository.GetProductsLike(name, companyId)
 	}
-	return productService.productRepository.getAllProducts(companyId)
+	return productService.productRepository.GetAllProducts(companyId)
 }
 
 func (productService ProductService) GetProduct(id string, companyId string) (*dto.ProductDetails, error) {
-	product, err := productService.productRepository.getProduct(id, companyId)
+	product, err := productService.productRepository.GetProduct(id, companyId)
 	return product, err
 }
 
 func (productService ProductService) CreateProduct(product *models.Product) (*models.Product, error) {
-	return productService.productRepository.createProduct(product)
+	return productService.productRepository.CreateProduct(product)
 }
 
 func (productService ProductService) DeleteProduct(id int, companyId string) error {
-	return productService.productRepository.deleteProduct(id, companyId)
+	return productService.productRepository.DeleteProduct(id, companyId)
 }
