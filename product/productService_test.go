@@ -53,3 +53,12 @@ func TestGetProduct(t *testing.T) {
 
 	assert.NotNil(t, err)
 }
+
+func TestDeleteProduct(t *testing.T) {
+	mockRepo := mock.NewProductRepositoryMock(products)
+	productService := NewProductService(mockRepo)
+
+	err := productService.DeleteProduct(1, "2508")
+
+	assert.Nil(t, err)
+}
