@@ -4,6 +4,7 @@ import (
 	"fr/greytsu/sol_api_products/config"
 	"fr/greytsu/sol_api_products/database"
 	"fr/greytsu/sol_api_products/product"
+	"fr/greytsu/sol_api_products/stock"
 	"fr/greytsu/sol_api_products/variant"
 	"fr/greytsu/sol_api_products/warehouse"
 
@@ -37,6 +38,10 @@ func main() {
 	warehouseRepository := warehouse.NewWarehouseRepository(databaseCon.GetDatabaseCon())
 	warehouseService := warehouse.NewWarehouseService(warehouseRepository)
 
+	//Init stock
+	stockRepository := stock.NewStockRepository(databaseCon.GetDatabaseCon())
+	stockService := stock.NewStockService(stockRepository)
+
 	//Create the Gin router
 	router := gin.Default()
 	v1 := router.Group("/api/v1")
@@ -44,7 +49,7 @@ func main() {
 	//Routes
 	product.RegisterProductsRoutes(v1, productService, variantService)
 	warehouse.RegisterWarehousesRoutes(v1, warehouseService)
-	variant.RegisterVariantsRoutes(v1, variantService)
+	variant.RegisterVariantsRoutes(v1, variantService, stockService)
 
 	err = router.Run()
 	if err != nil {

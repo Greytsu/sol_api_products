@@ -1,7 +1,10 @@
 package variant
 
 import (
+	"fr/greytsu/sol_api_products/dto"
 	"fr/greytsu/sol_api_products/models"
+	"fr/greytsu/sol_api_products/stock"
+	"github.com/rs/zerolog/log"
 
 	"github.com/gin-gonic/gin"
 
@@ -10,9 +13,10 @@ import (
 	"strings"
 )
 
-func RegisterVariantsRoutes(routerGroup *gin.RouterGroup, variantService *VariantService) {
+func RegisterVariantsRoutes(routerGroup *gin.RouterGroup, variantService *VariantService, stockService *stock.StockService) {
 	routerGroup.PUT("/variants/:id", putVariant(variantService))
 	routerGroup.DELETE("/variants/:id", deleteVariant(variantService))
+	routerGroup.POST("/variants/:id/stocks", postStocks(stockService))
 }
 
 func putVariant(variantService *VariantService) gin.HandlerFunc {
@@ -67,5 +71,33 @@ func deleteVariant(variantService *VariantService) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusNoContent, "")
+	}
+}
+
+func postStocks(stockService *stock.StockService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
+			return
+		}
+
+		var stockOperation dto.StockOperation
+		if err := c.BindJSON(&stockOperation); err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
+			return
+		}
+
+		stockOperation.VariantId = id
+		log.Debug().Int("companyId", companyId).Msg("")
+		c.IndentedJSON(http.StatusOK, stockOperation)
 	}
 }

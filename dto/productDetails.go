@@ -39,7 +39,7 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 		variant.FKProductID = value.FKProductID
 		stocks := value.R.GetFKVariantStocks()
 		if stocks != nil {
-			variant.Stock = *stocks[0]
+			variant.Stocks = stocks
 		}
 		variantsStock = append(variantsStock, variant)
 	}
