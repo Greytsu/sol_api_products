@@ -54,6 +54,14 @@ func (productRepository *ProductRepository) GetProduct(id string, companyId stri
 	return dto.NewProductDetails(product), nil
 }
 
+func (productRepository *ProductRepository) GetProductByReference(reference string, companyId string) (*models.Product, error) {
+	product, err := models.Products(qm.Where("reference=?", reference), qm.Where("company_id=?", companyId)).One(context.Background(), productRepository.db)
+	if err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
 func (productRepository *ProductRepository) CreateProduct(product *models.Product) (*models.Product, error) {
 	productRepository.Lock()
 	defer productRepository.Unlock()

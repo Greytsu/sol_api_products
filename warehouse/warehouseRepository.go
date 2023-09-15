@@ -28,6 +28,14 @@ func (warehouseRepository *WarehouseRepository) getAllWarehouses(companyId strin
 	return warehouses, nil
 }
 
+func (warehouseRepository *WarehouseRepository) getWarehouseByName(name string, companyId string) (*models.Warehouse, error) {
+	warehouse, err := models.Warehouses(qm.Where("company_id=?", companyId), qm.Where("name=?", name)).One(context.Background(), warehouseRepository.db)
+	if err != nil {
+		return nil, err
+	}
+	return warehouse, nil
+}
+
 func (warehouseRepository *WarehouseRepository) createWarehouse(warehouse *models.Warehouse) (*models.Warehouse, error) {
 	warehouseRepository.Lock()
 	defer warehouseRepository.Unlock()

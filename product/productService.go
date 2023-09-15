@@ -3,6 +3,10 @@ package product
 import (
 	"fr/greytsu/sol_api_products/dto"
 	"fr/greytsu/sol_api_products/models"
+
+	"github.com/friendsofgo/errors"
+
+	"strconv"
 )
 
 type ProductService struct {
@@ -13,6 +17,7 @@ type productRepository interface {
 	GetAllProducts(companyId string) ([]*models.Product, error)
 	GetProductsLike(name string, companyId string) ([]*models.Product, error)
 	GetProduct(id string, companyId string) (*dto.ProductDetails, error)
+	GetProductByReference(reference string, companyId string) (*models.Product, error)
 	CreateProduct(product *models.Product) (*models.Product, error)
 	DeleteProduct(id int, companyId string) error
 }
@@ -35,7 +40,16 @@ func (productService ProductService) GetProduct(id string, companyId string) (*d
 	return product, err
 }
 
+func (productService ProductService) GetProductByReference(reference string, companyId string) (*models.Product, error) {
+	product, err := productService.productRepository.GetProductByReference(reference, companyId)
+	return product, err
+}
+
 func (productService ProductService) CreateProduct(product *models.Product) (*models.Product, error) {
+	productFound, _ := productService.GetProductByReference(product.Reference, strconv.Itoa(product.CompanyID))
+	if productFound != nil {
+		return nil, errors.New("Product already exists. ID: " + strconv.Itoa(productFound.ID))
+	}
 	return productService.productRepository.CreateProduct(product)
 }
 

@@ -67,8 +67,8 @@ func postProduct(productService *ProductService) gin.HandlerFunc {
 		newProduct.CompanyID = companyId
 		product, err := productService.CreateProduct(&newProduct)
 		if err != nil {
-			if strings.Contains(err.Error(), "Violation of UNIQUE KEY constraint") {
-				c.IndentedJSON(http.StatusBadRequest, "Reference already exists")
+			if strings.Contains(err.Error(), "Product already exists") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
 				return
 			}
 			c.IndentedJSON(http.StatusInternalServerError, "Error while creating product")
@@ -100,7 +100,7 @@ func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 		}
 		product, err := variantService.CreateVariant(&newVariant)
 		if err != nil {
-			if strings.Contains(err.Error(), "Violation of UNIQUE KEY constraint") {
+			if strings.Contains(err.Error(), "Variant already exists") {
 				c.IndentedJSON(http.StatusBadRequest, "Reference already exists")
 				return
 			}

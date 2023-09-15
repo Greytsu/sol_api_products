@@ -2,10 +2,13 @@ package warehouse
 
 import (
 	"fr/greytsu/sol_api_products/models"
+
 	"github.com/gin-gonic/gin"
+
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func RegisterProductRoutes(routerGroup *gin.RouterGroup, warehouseService *WarehouseService) {
@@ -43,6 +46,10 @@ func postWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
 		newWarehouse.CompanyID = companyId
 		product, err := warehouseService.CreateWarehouse(&newWarehouse)
 		if err != nil {
+			if strings.Contains(err.Error(), "Warehouse already exists") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
+				return
+			}
 			c.IndentedJSON(http.StatusInternalServerError, "Error while creating warehouse")
 			return
 		}

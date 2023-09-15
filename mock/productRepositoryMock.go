@@ -63,6 +63,10 @@ func (productRepositoryMock *ProductRepositoryMock) GetProduct(id string, compan
 	return nil, nil
 }
 
+func (productRepositoryMock *ProductRepositoryMock) GetProductByReference(reference string, companyId string) (*models.Product, error) {
+	return nil, nil
+}
+
 func (productRepositoryMock *ProductRepositoryMock) CreateProduct(product *models.Product) (*models.Product, error) {
 	return nil, nil
 }
