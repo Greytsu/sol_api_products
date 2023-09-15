@@ -15,6 +15,7 @@ func RegisterWarehousesRoutes(routerGroup *gin.RouterGroup, warehouseService *Wa
 	routerGroup.GET("/warehouses", getAllWarehouses(warehouseService))
 	routerGroup.POST("/warehouses", postWarehouse(warehouseService))
 	routerGroup.PUT("/warehouses/:id", putWarehouse(warehouseService))
+	routerGroup.DELETE("/warehouses/:id", deleteWarehouse(warehouseService))
 }
 
 func getAllWarehouses(warehouseService *WarehouseService) gin.HandlerFunc {
@@ -45,7 +46,7 @@ func postWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
 			return
 		}
 		newWarehouse.CompanyID = companyId
-		product, err := warehouseService.CreateWarehouse(&newWarehouse)
+		warehouse, err := warehouseService.CreateWarehouse(&newWarehouse)
 		if err != nil {
 			if strings.Contains(err.Error(), "Warehouse already exists") {
 				c.IndentedJSON(http.StatusBadRequest, err.Error())
@@ -54,7 +55,7 @@ func postWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
 			c.IndentedJSON(http.StatusInternalServerError, "Error while creating warehouse")
 			return
 		}
-		c.IndentedJSON(http.StatusOK, product)
+		c.IndentedJSON(http.StatusOK, warehouse)
 	}
 }
 
@@ -69,7 +70,7 @@ func putWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
+			c.IndentedJSON(http.StatusBadRequest, "Invalid warehouse id")
 			return
 		}
 
@@ -88,5 +89,28 @@ func putWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusOK, warehouse)
+	}
+}
+
+func deleteWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyId := c.Request.Header["Company_id"][0]
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid id")
+			return
+		}
+
+		err = warehouseService.DeleteWarehouse(id, companyId)
+		if err != nil {
+			if err.Error() == "sql: no rows in result set" {
+				c.IndentedJSON(http.StatusNotFound, "Warehouse not found")
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Error while deleting warehouse")
+			return
+		}
+		c.IndentedJSON(http.StatusNoContent, "")
 	}
 }

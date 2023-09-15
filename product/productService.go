@@ -30,24 +30,24 @@ func NewProductService(productRepo productRepository) *ProductService {
 	}
 }
 
-func (productService ProductService) GetAllProducts(name string, companyId string) ([]*models.Product, error) {
+func (productService *ProductService) GetAllProducts(name string, companyId string) ([]*models.Product, error) {
 	if name != "" {
 		return productService.productRepository.GetProductsLike(name, companyId)
 	}
 	return productService.productRepository.GetAllProducts(companyId)
 }
 
-func (productService ProductService) GetProduct(id string, companyId string) (*dto.ProductDetails, error) {
+func (productService *ProductService) GetProduct(id string, companyId string) (*dto.ProductDetails, error) {
 	product, err := productService.productRepository.GetProduct(id, companyId)
 	return product, err
 }
 
-func (productService ProductService) GetProductByReference(reference string, companyId string) (*models.Product, error) {
+func (productService *ProductService) GetProductByReference(reference string, companyId string) (*models.Product, error) {
 	product, err := productService.productRepository.GetProductByReference(reference, companyId)
 	return product, err
 }
 
-func (productService ProductService) CreateProduct(product *models.Product) (*models.Product, error) {
+func (productService *ProductService) CreateProduct(product *models.Product) (*models.Product, error) {
 	productFound, _ := productService.GetProductByReference(product.Reference, strconv.Itoa(product.CompanyID))
 	if productFound != nil {
 		return nil, errors.New("Product already exists. ID: " + strconv.Itoa(productFound.ID))
@@ -55,7 +55,7 @@ func (productService ProductService) CreateProduct(product *models.Product) (*mo
 	return productService.productRepository.CreateProduct(product)
 }
 
-func (productService ProductService) UpdateProduct(id int, companyId int, newProduct *models.Product) (*models.Product, error) {
+func (productService *ProductService) UpdateProduct(id int, companyId int, newProduct *models.Product) (*models.Product, error) {
 	baseProduct, _ := productService.productRepository.FindProduct(strconv.Itoa(id), strconv.Itoa(companyId))
 	if baseProduct == nil {
 		return nil, errors.New("Product not found.")
@@ -69,6 +69,6 @@ func (productService ProductService) UpdateProduct(id int, companyId int, newPro
 	return baseProduct, err
 }
 
-func (productService ProductService) DeleteProduct(id int, companyId string) error {
+func (productService *ProductService) DeleteProduct(id int, companyId string) error {
 	return productService.productRepository.DeleteProduct(id, companyId)
 }

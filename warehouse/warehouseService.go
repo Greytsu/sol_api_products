@@ -25,6 +25,7 @@ func (warehouseService *WarehouseService) GetAllWarehouses(companyId string) ([]
 func (warehouseService *WarehouseService) GetWarehouse(id string, companyId string) (*models.Warehouse, error) {
 	return warehouseService.warehouseRepository.getWarehouse(id, companyId)
 }
+
 func (warehouseService *WarehouseService) GetWarehouseByName(name string, companyId string) (*models.Warehouse, error) {
 	return warehouseService.warehouseRepository.getWarehouseByName(name, companyId)
 }
@@ -52,4 +53,8 @@ func (warehouseService *WarehouseService) UpdateWarehouse(id int, companyId int,
 	err := warehouseService.warehouseRepository.updateWarehouse(warehouseFoundId)
 
 	return warehouseFoundId, err
+}
+
+func (warehouseService *WarehouseService) DeleteWarehouse(id int, companyId string) error {
+	return warehouseService.warehouseRepository.DeleteWarehouse(id, companyId)
 }

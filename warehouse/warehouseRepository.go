@@ -66,3 +66,15 @@ func (warehouseRepository *WarehouseRepository) updateWarehouse(warehouse *model
 	_, err := warehouse.Update(context.Background(), warehouseRepository.db, boil.Infer())
 	return err
 }
+
+func (warehouseRepository *WarehouseRepository) DeleteWarehouse(id int, companyId string) error {
+	warehouseRepository.Lock()
+	defer warehouseRepository.Unlock()
+	log.Debug().Int("Warehouse ID", id).Msg("Deleting warehouse")
+	warehouse, err := models.Warehouses(qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), warehouseRepository.db)
+	if err != nil {
+		return err
+	}
+	_, err = warehouse.Delete(context.Background(), warehouseRepository.db)
+	return err
+}

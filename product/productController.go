@@ -155,6 +155,7 @@ func deleteProduct(productService *ProductService) gin.HandlerFunc {
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			c.IndentedJSON(http.StatusBadRequest, "Invalid id")
+			return
 		}
 
 		err = productService.DeleteProduct(id, companyId)

@@ -94,7 +94,7 @@ func (productRepository *ProductRepository) DeleteProduct(id int, companyId stri
 	productRepository.Lock()
 	defer productRepository.Unlock()
 	log.Debug().Int("Product ID", id).Msg("Deleting product")
-	product, err := models.Products(qm.Load(qm.Rels(models.ProductRels.FKProductVariants, models.VariantRels.FKVariantStocks)), qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), productRepository.db)
+	product, err := models.Products(qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), productRepository.db)
 	if err != nil {
 		return err
 	}

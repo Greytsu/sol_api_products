@@ -11,8 +11,8 @@ import (
 )
 
 func RegisterVariantsRoutes(routerGroup *gin.RouterGroup, variantService *VariantService) {
-
-	routerGroup.PUT("/variants/:variantId", putVariant(variantService))
+	routerGroup.PUT("/variants/:id", putVariant(variantService))
+	routerGroup.DELETE("/variants/:id", deleteVariant(variantService))
 }
 
 func putVariant(variantService *VariantService) gin.HandlerFunc {
@@ -23,10 +23,10 @@ func putVariant(variantService *VariantService) gin.HandlerFunc {
 			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
 			return
 		}
-		variantIdStr := c.Param("variantId")
+		variantIdStr := c.Param("id")
 		variantId, err := strconv.Atoi(variantIdStr)
 		if err != nil {
-			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
+			c.IndentedJSON(http.StatusBadRequest, "Invalid variant id")
 			return
 		}
 		var updateVariant models.Variant
@@ -44,5 +44,28 @@ func putVariant(variantService *VariantService) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusOK, updatedVariant)
+	}
+}
+
+func deleteVariant(variantService *VariantService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyId := c.Request.Header["Company_id"][0]
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid id")
+			return
+		}
+
+		err = variantService.DeleteVariant(id, companyId)
+		if err != nil {
+			if err.Error() == "sql: no rows in result set" {
+				c.IndentedJSON(http.StatusNotFound, "Variant not found")
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Error while deleting variant")
+			return
+		}
+		c.IndentedJSON(http.StatusNoContent, "")
 	}
 }

@@ -49,8 +49,20 @@ func (variantRepository *VariantRepository) CreateVariant(variant *models.Varian
 func (variantRepository *VariantRepository) UpdateVariant(variant *models.Variant) error {
 	variantRepository.Lock()
 	defer variantRepository.Unlock()
-	log.Debug().Int("Product ID", variant.ID).Msg("Updating variant")
+	log.Debug().Int("Variant ID", variant.ID).Msg("Updating variant")
 	rows, err := variant.Update(context.Background(), variantRepository.db, boil.Infer())
 	log.Debug().Int64("rows", rows)
+	return err
+}
+
+func (variantRepository *VariantRepository) DeleteVariant(id int, companyId string) error {
+	variantRepository.Lock()
+	defer variantRepository.Unlock()
+	log.Debug().Int("Variant ID", id).Msg("Deleting variant")
+	variant, err := models.Variants(qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), variantRepository.db)
+	if err != nil {
+		return err
+	}
+	_, err = variant.Delete(context.Background(), variantRepository.db)
 	return err
 }
