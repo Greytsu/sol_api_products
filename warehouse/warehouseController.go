@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func RegisterProductRoutes(routerGroup *gin.RouterGroup, warehouseService *WarehouseService) {
+func RegisterWarehousesRoutes(routerGroup *gin.RouterGroup, warehouseService *WarehouseService) {
 	routerGroup.GET("/warehouses", getAllWarehouses(warehouseService))
 	routerGroup.POST("/warehouses", postWarehouse(warehouseService))
 	routerGroup.PUT("/warehouses/:id", putWarehouse(warehouseService))

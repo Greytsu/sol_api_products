@@ -42,8 +42,9 @@ func main() {
 	v1 := router.Group("/api/v1")
 
 	//Routes
-	product.RegisterProductRoutes(v1, productService, variantService)
-	warehouse.RegisterProductRoutes(v1, warehouseService)
+	product.RegisterProductsRoutes(v1, productService, variantService)
+	warehouse.RegisterWarehousesRoutes(v1, warehouseService)
+	variant.RegisterVariantsRoutes(v1, variantService)
 
 	err = router.Run()
 	if err != nil {

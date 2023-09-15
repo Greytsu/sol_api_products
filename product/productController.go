@@ -3,20 +3,22 @@ package product
 import (
 	"fr/greytsu/sol_api_products/models"
 	"fr/greytsu/sol_api_products/variant"
+
 	"github.com/gin-gonic/gin"
+
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-func RegisterProductRoutes(routerGroup *gin.RouterGroup, productService *ProductService, variantService *variant.VariantService) {
+func RegisterProductsRoutes(routerGroup *gin.RouterGroup, productService *ProductService, variantService *variant.VariantService) {
 	routerGroup.GET("/products", getAllProducts(productService))
 	routerGroup.GET("/products/:id", getProduct(productService))
 	routerGroup.POST("/products", postProduct(productService))
 	routerGroup.PUT("/products/:id", putProduct(productService))
-	routerGroup.POST("/products/:id/variants", postVariant(variantService))
-	routerGroup.PUT("/variants/:variantId", putVariant(variantService))
 	routerGroup.DELETE("/products/:id", deleteProduct(productService))
+
+	routerGroup.POST("/products/:id/variants", postVariant(variantService))
 }
 
 func getAllProducts(productService *ProductService) gin.HandlerFunc {
@@ -143,38 +145,6 @@ func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusOK, product)
-	}
-}
-
-func putVariant(variantService *variant.VariantService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		companyIdStr := c.Request.Header["Company_id"][0]
-		companyId, err := strconv.Atoi(companyIdStr)
-		if err != nil {
-			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
-			return
-		}
-		variantIdStr := c.Param("variantId")
-		variantId, err := strconv.Atoi(variantIdStr)
-		if err != nil {
-			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
-			return
-		}
-		var updateVariant models.Variant
-		if err := c.BindJSON(&updateVariant); err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
-			return
-		}
-		updatedVariant, err := variantService.UpdateVariant(variantId, companyId, &updateVariant)
-		if err != nil {
-			if strings.Contains(err.Error(), "Variant not found") || strings.Contains(err.Error(), "Reference already taken") {
-				c.IndentedJSON(http.StatusBadRequest, err.Error())
-				return
-			}
-			c.IndentedJSON(http.StatusInternalServerError, "Error while updating variant")
-			return
-		}
-		c.IndentedJSON(http.StatusOK, updatedVariant)
 	}
 }
 
