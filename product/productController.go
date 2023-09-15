@@ -13,7 +13,9 @@ func RegisterProductRoutes(routerGroup *gin.RouterGroup, productService *Product
 	routerGroup.GET("/products", getAllProducts(productService))
 	routerGroup.GET("/products/:id", getProduct(productService))
 	routerGroup.POST("/products", postProduct(productService))
-	routerGroup.POST("/products/:productId/variants", postVariant(variantService))
+	routerGroup.PUT("/products/:id", putProduct(productService))
+	routerGroup.POST("/products/:id/variants", postVariant(variantService))
+	routerGroup.PUT("/variants/:variantId", putVariant(variantService))
 	routerGroup.DELETE("/products/:id", deleteProduct(productService))
 }
 
@@ -79,6 +81,39 @@ func postProduct(productService *ProductService) gin.HandlerFunc {
 	}
 }
 
+func putProduct(productService *ProductService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
+			return
+		}
+		var updateProduct models.Product
+		if err := c.BindJSON(&updateProduct); err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
+			return
+		}
+		product, err := productService.UpdateProduct(id, companyId, &updateProduct)
+		if err != nil {
+			if strings.Contains(err.Error(), "Product not found") || strings.Contains(err.Error(), "Reference already taken") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Error while updating variant")
+			return
+		}
+		c.IndentedJSON(http.StatusOK, product)
+
+	}
+}
+
 func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		companyIdStr := c.Request.Header["Company_id"][0]
@@ -88,7 +123,7 @@ func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 			return
 		}
 
-		productIdStr := c.Param("productId")
+		productIdStr := c.Param("id")
 		productId, err := strconv.Atoi(productIdStr)
 
 		var newVariant models.Variant
@@ -108,6 +143,38 @@ func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusOK, product)
+	}
+}
+
+func putVariant(variantService *variant.VariantService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+		variantIdStr := c.Param("variantId")
+		variantId, err := strconv.Atoi(variantIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
+			return
+		}
+		var updateVariant models.Variant
+		if err := c.BindJSON(&updateVariant); err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
+			return
+		}
+		updatedVariant, err := variantService.UpdateVariant(variantId, companyId, &updateVariant)
+		if err != nil {
+			if strings.Contains(err.Error(), "Variant not found") || strings.Contains(err.Error(), "Reference already taken") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Error while updating variant")
+			return
+		}
+		c.IndentedJSON(http.StatusOK, updatedVariant)
 	}
 }
 

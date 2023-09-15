@@ -23,6 +23,7 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 }
 
 func (productRepository *ProductRepository) GetAllProducts(companyId string) ([]*models.Product, error) {
+
 	products, err := models.Products(qm.Where("company_id=?", companyId)).All(context.Background(), productRepository.db)
 	if err != nil {
 		return nil, err
@@ -30,7 +31,7 @@ func (productRepository *ProductRepository) GetAllProducts(companyId string) ([]
 	if products == nil {
 		products = []*models.Product{}
 	}
-	log.Debug().Int("products", len(products)).Msg("Number of products")
+	log.Debug().Int("amount", len(products)).Msg("Products found")
 	return products, nil
 }
 
@@ -42,8 +43,17 @@ func (productRepository *ProductRepository) GetProductsLike(name string, company
 	if products == nil {
 		products = []*models.Product{}
 	}
-	log.Debug().Int("products", len(products)).Msg("Number of products")
+	log.Debug().Int("amount", len(products)).Msg("Products found")
 	return products, nil
+}
+
+func (productRepository *ProductRepository) FindProduct(id string, companyId string) (*models.Product, error) {
+	product, err := models.Products(qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), productRepository.db)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug().Str("Name", product.Name).Msg("Product found")
+	return product, nil
 }
 
 func (productRepository *ProductRepository) GetProduct(id string, companyId string) (*dto.ProductDetails, error) {
@@ -51,6 +61,7 @@ func (productRepository *ProductRepository) GetProduct(id string, companyId stri
 	if err != nil {
 		return nil, err
 	}
+	log.Debug().Str("Name", product.Name).Msg("Product found")
 	return dto.NewProductDetails(product), nil
 }
 
@@ -59,6 +70,7 @@ func (productRepository *ProductRepository) GetProductByReference(reference stri
 	if err != nil {
 		return nil, err
 	}
+	log.Debug().Str("Name", product.Name).Msg("Product found")
 	return product, nil
 }
 
@@ -70,10 +82,18 @@ func (productRepository *ProductRepository) CreateProduct(product *models.Produc
 	return product, err
 }
 
+func (productRepository *ProductRepository) UpdateProduct(product *models.Product) error {
+	productRepository.Lock()
+	defer productRepository.Unlock()
+	log.Debug().Int("Product ID", product.ID).Msg("Updating product")
+	_, err := product.Update(context.Background(), productRepository.db, boil.Infer())
+	return err
+}
+
 func (productRepository *ProductRepository) DeleteProduct(id int, companyId string) error {
 	productRepository.Lock()
 	defer productRepository.Unlock()
-	log.Debug().Msg("Deleting product")
+	log.Debug().Int("Product ID", id).Msg("Deleting product")
 	product, err := models.Products(qm.Load(qm.Rels(models.ProductRels.FKProductVariants, models.VariantRels.FKVariantStocks)), qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), productRepository.db)
 	if err != nil {
 		return err

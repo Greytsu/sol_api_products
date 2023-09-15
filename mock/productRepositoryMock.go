@@ -54,6 +54,10 @@ func (productRepositoryMock *ProductRepositoryMock) GetProductsLike(name string,
 	return filteredProducts, nil
 }
 
+func (productRepositoryMock *ProductRepositoryMock) FindProduct(id string, companyId string) (*models.Product, error) {
+	return nil, nil
+}
+
 func (productRepositoryMock *ProductRepositoryMock) GetProduct(id string, companyId string) (*dto.ProductDetails, error) {
 	_, err := strconv.Atoi(id)
 	if err != nil {
@@ -69,6 +73,10 @@ func (productRepositoryMock *ProductRepositoryMock) GetProductByReference(refere
 
 func (productRepositoryMock *ProductRepositoryMock) CreateProduct(product *models.Product) (*models.Product, error) {
 	return nil, nil
+}
+
+func (productRepositoryMock *ProductRepositoryMock) UpdateProduct(product *models.Product) error {
+	return nil
 }
 
 func (productRepositoryMock *ProductRepositoryMock) DeleteProduct(id int, companyId string) error {

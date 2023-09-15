@@ -3,7 +3,7 @@ package product
 import (
 	"fr/greytsu/sol_api_products/dto"
 	"fr/greytsu/sol_api_products/models"
-
+	"fr/greytsu/sol_api_products/utils"
 	"github.com/friendsofgo/errors"
 
 	"strconv"
@@ -16,9 +16,11 @@ type ProductService struct {
 type productRepository interface {
 	GetAllProducts(companyId string) ([]*models.Product, error)
 	GetProductsLike(name string, companyId string) ([]*models.Product, error)
+	FindProduct(id string, companyId string) (*models.Product, error)
 	GetProduct(id string, companyId string) (*dto.ProductDetails, error)
 	GetProductByReference(reference string, companyId string) (*models.Product, error)
 	CreateProduct(product *models.Product) (*models.Product, error)
+	UpdateProduct(product *models.Product) error
 	DeleteProduct(id int, companyId string) error
 }
 
@@ -51,6 +53,20 @@ func (productService ProductService) CreateProduct(product *models.Product) (*mo
 		return nil, errors.New("Product already exists. ID: " + strconv.Itoa(productFound.ID))
 	}
 	return productService.productRepository.CreateProduct(product)
+}
+
+func (productService ProductService) UpdateProduct(id int, companyId int, newProduct *models.Product) (*models.Product, error) {
+	baseProduct, _ := productService.productRepository.FindProduct(strconv.Itoa(id), strconv.Itoa(companyId))
+	if baseProduct == nil {
+		return nil, errors.New("Product not found.")
+	}
+	foundProduct, _ := productService.GetProductByReference(newProduct.Reference, strconv.Itoa(companyId))
+	if foundProduct != nil && foundProduct.ID != id {
+		return nil, errors.New("Reference already taken. ID: " + strconv.Itoa(foundProduct.ID))
+	}
+	baseProduct = utils.MergeProducts(baseProduct, newProduct)
+	err := productService.productRepository.UpdateProduct(baseProduct)
+	return baseProduct, err
 }
 
 func (productService ProductService) DeleteProduct(id int, companyId string) error {

@@ -2,13 +2,16 @@ package dto
 
 import (
 	"fr/greytsu/sol_api_products/models"
+
 	"github.com/volatiletech/null/v8"
+
 	"time"
 )
 
 type VariantStock struct {
 	ID            int          `json:"id" toml:"id" yaml:"id"`
 	CompanyID     int          `json:"company_id" toml:"company_id" yaml:"company_id"`
+	Reference     string       `json:"reference" toml:"reference" yaml:"reference"`
 	Name          string       `json:"name" toml:"name" yaml:"name"`
 	StockTracking bool         `json:"stock_tracking" toml:"stock_tracking" yaml:"stock_tracking"`
 	PurchasePrice null.Float64 `json:"purchase_price,omitempty" toml:"purchase_price" yaml:"purchase_price,omitempty"`

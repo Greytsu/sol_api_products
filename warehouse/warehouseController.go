@@ -14,6 +14,7 @@ import (
 func RegisterProductRoutes(routerGroup *gin.RouterGroup, warehouseService *WarehouseService) {
 	routerGroup.GET("/warehouses", getAllWarehouses(warehouseService))
 	routerGroup.POST("/warehouses", postWarehouse(warehouseService))
+	routerGroup.PUT("/warehouses/:id", putWarehouse(warehouseService))
 }
 
 func getAllWarehouses(warehouseService *WarehouseService) gin.HandlerFunc {
@@ -54,5 +55,38 @@ func postWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusOK, product)
+	}
+}
+
+func putWarehouse(warehouseService *WarehouseService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
+			return
+		}
+
+		var updateWarehouse models.Warehouse
+		if err := c.BindJSON(&updateWarehouse); err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
+			return
+		}
+		warehouse, err := warehouseService.UpdateWarehouse(id, companyId, &updateWarehouse)
+		if err != nil {
+			if strings.Contains(err.Error(), "Warehouse not found") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Error while updating warehouse")
+			return
+		}
+		c.IndentedJSON(http.StatusOK, warehouse)
 	}
 }
