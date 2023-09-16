@@ -1,7 +1,9 @@
 package variant
 
 import (
+	"fr/greytsu/sol_api_products/dto"
 	"fr/greytsu/sol_api_products/models"
+	"fr/greytsu/sol_api_products/stock"
 	"fr/greytsu/sol_api_products/utils"
 
 	"errors"
@@ -10,11 +12,13 @@ import (
 
 type VariantService struct {
 	VariantRepository *VariantRepository
+	StockService      *stock.StockService
 }
 
-func NewVariantService(VariantRepo *VariantRepository) *VariantService {
+func NewVariantService(variantRepo *VariantRepository, stockService *stock.StockService) *VariantService {
 	return &VariantService{
-		VariantRepository: VariantRepo,
+		VariantRepository: variantRepo,
+		StockService:      stockService,
 	}
 }
 
@@ -50,4 +54,16 @@ func (variantService *VariantService) UpdateVariant(id int, companyId int, newVa
 
 func (variantService *VariantService) DeleteVariant(id int, companyId string) error {
 	return variantService.VariantRepository.DeleteVariant(id, companyId)
+}
+
+func (variantService *VariantService) StockOperation(operation dto.StockOperation, companyId int) (*models.Stock, error) {
+	variant, err := variantService.GetVariant(strconv.Itoa(operation.VariantId), strconv.Itoa(companyId))
+	if err != nil || variant == nil {
+		return nil, errors.New("Variant not found")
+	}
+	newStock, err := variantService.StockService.StockOperation(operation, companyId)
+	if err != nil {
+		return nil, err
+	}
+	return newStock, nil
 }

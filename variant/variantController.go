@@ -3,7 +3,6 @@ package variant
 import (
 	"fr/greytsu/sol_api_products/dto"
 	"fr/greytsu/sol_api_products/models"
-	"fr/greytsu/sol_api_products/stock"
 	"github.com/rs/zerolog/log"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +12,10 @@ import (
 	"strings"
 )
 
-func RegisterVariantsRoutes(routerGroup *gin.RouterGroup, variantService *VariantService, stockService *stock.StockService) {
+func RegisterVariantsRoutes(routerGroup *gin.RouterGroup, variantService *VariantService) {
 	routerGroup.PUT("/variants/:id", putVariant(variantService))
 	routerGroup.DELETE("/variants/:id", deleteVariant(variantService))
-	routerGroup.POST("/variants/:id/stocks", postStocks(stockService))
+	routerGroup.POST("/variants/:id/stocks", postStocks(variantService))
 }
 
 func putVariant(variantService *VariantService) gin.HandlerFunc {
@@ -74,7 +73,7 @@ func deleteVariant(variantService *VariantService) gin.HandlerFunc {
 	}
 }
 
-func postStocks(stockService *stock.StockService) gin.HandlerFunc {
+func postStocks(variantService *VariantService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		companyIdStr := c.Request.Header["Company_id"][0]
 		companyId, err := strconv.Atoi(companyIdStr)
@@ -96,8 +95,22 @@ func postStocks(stockService *stock.StockService) gin.HandlerFunc {
 			return
 		}
 
+		if stockOperation.Quantity < 0 {
+			c.IndentedJSON(http.StatusBadRequest, "Stock cannot be negative")
+			return
+		}
+
 		stockOperation.VariantId = id
 		log.Debug().Int("companyId", companyId).Msg("")
-		c.IndentedJSON(http.StatusOK, stockOperation)
+		stock, err := variantService.StockOperation(stockOperation, companyId)
+		if err != nil {
+			if strings.Contains(err.Error(), "Not enough stock") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.IndentedJSON(http.StatusOK, stock)
 	}
 }

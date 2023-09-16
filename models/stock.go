@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,8 +25,8 @@ import (
 type Stock struct {
 	ID            int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CompanyID     int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
-	FKWarehouseID null.Int  `boil:"fk_warehouse_id" json:"warehouse_id,omitempty" toml:"fk_warehouse_id" yaml:"fk_warehouse_id,omitempty"`
-	FKVariantID   null.Int  `boil:"fk_variant_id" json:"-" toml:"fk_variant_id" yaml:"fk_variant_id,omitempty"`
+	FKWarehouseID int       `boil:"fk_warehouse_id" json:"fk_warehouse_id" toml:"fk_warehouse_id" yaml:"fk_warehouse_id"`
+	FKVariantID   int       `boil:"fk_variant_id" json:"fk_variant_id" toml:"fk_variant_id" yaml:"fk_variant_id"`
 	Quantity      int       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
 	CreateTime    time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime    time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
@@ -77,16 +76,16 @@ var StockTableColumns = struct {
 var StockWhere = struct {
 	ID            whereHelperint
 	CompanyID     whereHelperint
-	FKWarehouseID whereHelpernull_Int
-	FKVariantID   whereHelpernull_Int
+	FKWarehouseID whereHelperint
+	FKVariantID   whereHelperint
 	Quantity      whereHelperint
 	CreateTime    whereHelpertime_Time
 	UpdateTime    whereHelpertime_Time
 }{
 	ID:            whereHelperint{field: "[products].[stock].[id]"},
 	CompanyID:     whereHelperint{field: "[products].[stock].[company_id]"},
-	FKWarehouseID: whereHelpernull_Int{field: "[products].[stock].[fk_warehouse_id]"},
-	FKVariantID:   whereHelpernull_Int{field: "[products].[stock].[fk_variant_id]"},
+	FKWarehouseID: whereHelperint{field: "[products].[stock].[fk_warehouse_id]"},
+	FKVariantID:   whereHelperint{field: "[products].[stock].[fk_variant_id]"},
 	Quantity:      whereHelperint{field: "[products].[stock].[quantity]"},
 	CreateTime:    whereHelpertime_Time{field: "[products].[stock].[create_time]"},
 	UpdateTime:    whereHelpertime_Time{field: "[products].[stock].[update_time]"},
@@ -470,9 +469,7 @@ func (stockL) LoadFKVariant(ctx context.Context, e boil.ContextExecutor, singula
 		if object.R == nil {
 			object.R = &stockR{}
 		}
-		if !queries.IsNil(object.FKVariantID) {
-			args = append(args, object.FKVariantID)
-		}
+		args = append(args, object.FKVariantID)
 
 	} else {
 	Outer:
@@ -482,14 +479,12 @@ func (stockL) LoadFKVariant(ctx context.Context, e boil.ContextExecutor, singula
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.FKVariantID) {
+				if a == obj.FKVariantID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.FKVariantID) {
-				args = append(args, obj.FKVariantID)
-			}
+			args = append(args, obj.FKVariantID)
 
 		}
 	}
@@ -547,7 +542,7 @@ func (stockL) LoadFKVariant(ctx context.Context, e boil.ContextExecutor, singula
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.FKVariantID, foreign.ID) {
+			if local.FKVariantID == foreign.ID {
 				local.R.FKVariant = foreign
 				if foreign.R == nil {
 					foreign.R = &variantR{}
@@ -594,9 +589,7 @@ func (stockL) LoadFKWarehouse(ctx context.Context, e boil.ContextExecutor, singu
 		if object.R == nil {
 			object.R = &stockR{}
 		}
-		if !queries.IsNil(object.FKWarehouseID) {
-			args = append(args, object.FKWarehouseID)
-		}
+		args = append(args, object.FKWarehouseID)
 
 	} else {
 	Outer:
@@ -606,14 +599,12 @@ func (stockL) LoadFKWarehouse(ctx context.Context, e boil.ContextExecutor, singu
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.FKWarehouseID) {
+				if a == obj.FKWarehouseID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.FKWarehouseID) {
-				args = append(args, obj.FKWarehouseID)
-			}
+			args = append(args, obj.FKWarehouseID)
 
 		}
 	}
@@ -671,7 +662,7 @@ func (stockL) LoadFKWarehouse(ctx context.Context, e boil.ContextExecutor, singu
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.FKWarehouseID, foreign.ID) {
+			if local.FKWarehouseID == foreign.ID {
 				local.R.FKWarehouse = foreign
 				if foreign.R == nil {
 					foreign.R = &warehouseR{}
@@ -712,7 +703,7 @@ func (o *Stock) SetFKVariant(ctx context.Context, exec boil.ContextExecutor, ins
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.FKVariantID, related.ID)
+	o.FKVariantID = related.ID
 	if o.R == nil {
 		o.R = &stockR{
 			FKVariant: related,
@@ -729,39 +720,6 @@ func (o *Stock) SetFKVariant(ctx context.Context, exec boil.ContextExecutor, ins
 		related.R.FKVariantStocks = append(related.R.FKVariantStocks, o)
 	}
 
-	return nil
-}
-
-// RemoveFKVariant relationship.
-// Sets o.R.FKVariant to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Stock) RemoveFKVariant(ctx context.Context, exec boil.ContextExecutor, related *Variant) error {
-	var err error
-
-	queries.SetScanner(&o.FKVariantID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("fk_variant_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.FKVariant = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.FKVariantStocks {
-		if queries.Equal(o.FKVariantID, ri.FKVariantID) {
-			continue
-		}
-
-		ln := len(related.R.FKVariantStocks)
-		if ln > 1 && i < ln-1 {
-			related.R.FKVariantStocks[i] = related.R.FKVariantStocks[ln-1]
-		}
-		related.R.FKVariantStocks = related.R.FKVariantStocks[:ln-1]
-		break
-	}
 	return nil
 }
 
@@ -792,7 +750,7 @@ func (o *Stock) SetFKWarehouse(ctx context.Context, exec boil.ContextExecutor, i
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.FKWarehouseID, related.ID)
+	o.FKWarehouseID = related.ID
 	if o.R == nil {
 		o.R = &stockR{
 			FKWarehouse: related,
@@ -809,39 +767,6 @@ func (o *Stock) SetFKWarehouse(ctx context.Context, exec boil.ContextExecutor, i
 		related.R.FKWarehouseStocks = append(related.R.FKWarehouseStocks, o)
 	}
 
-	return nil
-}
-
-// RemoveFKWarehouse relationship.
-// Sets o.R.FKWarehouse to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Stock) RemoveFKWarehouse(ctx context.Context, exec boil.ContextExecutor, related *Warehouse) error {
-	var err error
-
-	queries.SetScanner(&o.FKWarehouseID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("fk_warehouse_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.FKWarehouse = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.FKWarehouseStocks {
-		if queries.Equal(o.FKWarehouseID, ri.FKWarehouseID) {
-			continue
-		}
-
-		ln := len(related.R.FKWarehouseStocks)
-		if ln > 1 && i < ln-1 {
-			related.R.FKWarehouseStocks[i] = related.R.FKWarehouseStocks[ln-1]
-		}
-		related.R.FKWarehouseStocks = related.R.FKWarehouseStocks[:ln-1]
-		break
-	}
 	return nil
 }
 

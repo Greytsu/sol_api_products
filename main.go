@@ -30,17 +30,17 @@ func main() {
 	productRepository := product.NewProductRepository(databaseCon.GetDatabaseCon())
 	productService := product.NewProductService(productRepository)
 
+	//Init stock
+	stockRepository := stock.NewStockRepository(databaseCon.GetDatabaseCon())
+	stockService := stock.NewStockService(stockRepository)
+
 	//Init variant
 	variantRepository := variant.NewVariantRepository(databaseCon.GetDatabaseCon())
-	variantService := variant.NewVariantService(variantRepository)
+	variantService := variant.NewVariantService(variantRepository, stockService)
 
 	//Init warehouse
 	warehouseRepository := warehouse.NewWarehouseRepository(databaseCon.GetDatabaseCon())
 	warehouseService := warehouse.NewWarehouseService(warehouseRepository)
-
-	//Init stock
-	stockRepository := stock.NewStockRepository(databaseCon.GetDatabaseCon())
-	stockService := stock.NewStockService(stockRepository)
 
 	//Create the Gin router
 	router := gin.Default()
@@ -49,7 +49,7 @@ func main() {
 	//Routes
 	product.RegisterProductsRoutes(v1, productService, variantService)
 	warehouse.RegisterWarehousesRoutes(v1, warehouseService)
-	variant.RegisterVariantsRoutes(v1, variantService, stockService)
+	variant.RegisterVariantsRoutes(v1, variantService)
 
 	err = router.Run()
 	if err != nil {
