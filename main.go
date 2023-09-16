@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fr/greytsu/sol_api_products/bundle"
+	"fr/greytsu/sol_api_products/bundleElement"
 	"fr/greytsu/sol_api_products/config"
 	"fr/greytsu/sol_api_products/database"
 	"fr/greytsu/sol_api_products/product"
@@ -42,6 +44,14 @@ func main() {
 	warehouseRepository := warehouse.NewWarehouseRepository(databaseCon.GetDatabaseCon())
 	warehouseService := warehouse.NewWarehouseService(warehouseRepository)
 
+	//Init bundle element
+	bundleElementRepository := bundleElement.NewBundleElementRepository(databaseCon.GetDatabaseCon())
+	bundleElementService := bundleElement.NewBundleElementService(bundleElementRepository)
+
+	//Init bundle
+	bundleRepository := bundle.NewBundleRepository(databaseCon.GetDatabaseCon())
+	bundleService := bundle.NewBundleService(bundleRepository, bundleElementService)
+
 	//Create the Gin router
 	router := gin.Default()
 	v1 := router.Group("/api/v1")
@@ -50,6 +60,8 @@ func main() {
 	product.RegisterProductsRoutes(v1, productService, variantService)
 	warehouse.RegisterWarehousesRoutes(v1, warehouseService)
 	variant.RegisterVariantsRoutes(v1, variantService)
+	bundle.RegisterBundlesRoutes(v1, bundleService)
+	bundleElement.RegisterBundleElementsRoutes(v1, bundleElementService)
 
 	err = router.Run()
 	if err != nil {
