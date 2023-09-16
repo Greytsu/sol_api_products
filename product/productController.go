@@ -3,22 +3,27 @@ package product
 import (
 	"fr/greytsu/sol_api_products/models"
 	"fr/greytsu/sol_api_products/variant"
+
 	"github.com/gin-gonic/gin"
+
 	"net/http"
 	"strconv"
+	"strings"
 )
 
-func RegisterProductRoutes(router *gin.Engine, productService *ProductService, variantService *variant.VariantService) {
-	router.GET("/products", getAllProducts(productService))
-	router.GET("/products/:id", getProduct(productService))
-	router.POST("/products", postProduct(productService))
-	router.POST("/products/:productId/variants", postVariant(variantService))
-	router.DELETE("/products/:id", deleteProduct(productService))
+func RegisterProductsRoutes(routerGroup *gin.RouterGroup, productService *ProductService, variantService *variant.VariantService) {
+	routerGroup.GET("/products", getAllProducts(productService))
+	routerGroup.GET("/products/:id", getProduct(productService))
+	routerGroup.POST("/products", postProduct(productService))
+	routerGroup.PUT("/products/:id", putProduct(productService))
+	routerGroup.DELETE("/products/:id", deleteProduct(productService))
+
+	routerGroup.POST("/products/:id/variants", postVariant(variantService))
 }
 
 func getAllProducts(productService *ProductService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		companyId := c.Query("company_id")
+		companyId := c.Request.Header["Company_id"][0]
 		name := c.Query("name")
 
 		products, err := productService.GetAllProducts(name, companyId)
@@ -32,7 +37,7 @@ func getAllProducts(productService *ProductService) gin.HandlerFunc {
 
 func getProduct(productService *ProductService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		companyId := c.Query("company_id")
+		companyId := c.Request.Header["Company_id"][0]
 		id := c.Param("id")
 
 		product, err := productService.GetProduct(id, companyId)
@@ -50,30 +55,92 @@ func getProduct(productService *ProductService) gin.HandlerFunc {
 
 func postProduct(productService *ProductService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+
 		var newProduct models.Product
 		if err := c.BindJSON(&newProduct); err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
+			return
 		}
+
+		newProduct.CompanyID = companyId
 		product, err := productService.CreateProduct(&newProduct)
 		if err != nil {
+			if strings.Contains(err.Error(), "Product already exists") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
+				return
+			}
 			c.IndentedJSON(http.StatusInternalServerError, "Error while creating product")
+			return
+		}
+
+		c.IndentedJSON(http.StatusOK, product)
+	}
+}
+
+func putProduct(productService *ProductService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+		idStr := c.Param("id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid product id")
+			return
+		}
+		var updateProduct models.Product
+		if err := c.BindJSON(&updateProduct); err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
+			return
+		}
+		product, err := productService.UpdateProduct(id, companyId, &updateProduct)
+		if err != nil {
+			if strings.Contains(err.Error(), "Product not found") || strings.Contains(err.Error(), "Reference already taken") {
+				c.IndentedJSON(http.StatusBadRequest, err.Error())
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Error while updating variant")
+			return
 		}
 		c.IndentedJSON(http.StatusOK, product)
+
 	}
 }
 
 func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		productIdStr := c.Param("productId")
+		companyIdStr := c.Request.Header["Company_id"][0]
+		companyId, err := strconv.Atoi(companyIdStr)
+		if err != nil {
+			c.IndentedJSON(http.StatusBadRequest, "Invalid company id")
+			return
+		}
+
+		productIdStr := c.Param("id")
 		productId, err := strconv.Atoi(productIdStr)
 
 		var newVariant models.Variant
 		newVariant.FKProductID = productId
+		newVariant.CompanyID = companyId
 		if err := c.BindJSON(&newVariant); err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, "Error while parsing JSON")
+			return
 		}
 		product, err := variantService.CreateVariant(&newVariant)
 		if err != nil {
+			if strings.Contains(err.Error(), "Variant already exists") {
+				c.IndentedJSON(http.StatusBadRequest, "Reference already exists")
+				return
+			}
 			c.IndentedJSON(http.StatusInternalServerError, "Error while creating variant")
 			return
 		}
@@ -83,11 +150,12 @@ func postVariant(variantService *variant.VariantService) gin.HandlerFunc {
 
 func deleteProduct(productService *ProductService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		companyId := c.Query("company_id")
+		companyId := c.Request.Header["Company_id"][0]
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			c.IndentedJSON(http.StatusBadRequest, "Invalid id")
+			return
 		}
 
 		err = productService.DeleteProduct(id, companyId)

@@ -33,7 +33,7 @@ type Variant struct {
 	SellingPrice  null.Float64 `boil:"selling_price" json:"selling_price,omitempty" toml:"selling_price" yaml:"selling_price,omitempty"`
 	CreateTime    time.Time    `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime    time.Time    `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
-	FKProductID   int          `boil:"fk_product_id" json:"fk_product_id" toml:"fk_product_id" yaml:"fk_product_id"`
+	FKProductID   int          `boil:"fk_product_id" json:"product_id" toml:"fk_product_id" yaml:"fk_product_id"`
 
 	R *variantR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L variantL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -808,7 +808,7 @@ func (variantL) LoadFKVariantStocks(ctx context.Context, e boil.ContextExecutor,
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -866,7 +866,7 @@ func (variantL) LoadFKVariantStocks(ctx context.Context, e boil.ContextExecutor,
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.FKVariantID) {
+			if local.ID == foreign.FKVariantID {
 				local.R.FKVariantStocks = append(local.R.FKVariantStocks, foreign)
 				if foreign.R == nil {
 					foreign.R = &stockR{}
@@ -1062,7 +1062,7 @@ func (o *Variant) AddFKVariantStocks(ctx context.Context, exec boil.ContextExecu
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.FKVariantID, o.ID)
+			rel.FKVariantID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -1083,7 +1083,7 @@ func (o *Variant) AddFKVariantStocks(ctx context.Context, exec boil.ContextExecu
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.FKVariantID, o.ID)
+			rel.FKVariantID = o.ID
 		}
 	}
 
@@ -1104,80 +1104,6 @@ func (o *Variant) AddFKVariantStocks(ctx context.Context, exec boil.ContextExecu
 			rel.R.FKVariant = o
 		}
 	}
-	return nil
-}
-
-// SetFKVariantStocks removes all previously related items of the
-// variant replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.FKVariant's FKVariantStocks accordingly.
-// Replaces o.R.FKVariantStocks with related.
-// Sets related.R.FKVariant's FKVariantStocks accordingly.
-func (o *Variant) SetFKVariantStocks(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Stock) error {
-	query := "update [products].[stock] set [fk_variant_id] = null where [fk_variant_id] = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.FKVariantStocks {
-			queries.SetScanner(&rel.FKVariantID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.FKVariant = nil
-		}
-		o.R.FKVariantStocks = nil
-	}
-
-	return o.AddFKVariantStocks(ctx, exec, insert, related...)
-}
-
-// RemoveFKVariantStocks relationships from objects passed in.
-// Removes related items from R.FKVariantStocks (uses pointer comparison, removal does not keep order)
-// Sets related.R.FKVariant.
-func (o *Variant) RemoveFKVariantStocks(ctx context.Context, exec boil.ContextExecutor, related ...*Stock) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.FKVariantID, nil)
-		if rel.R != nil {
-			rel.R.FKVariant = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("fk_variant_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.FKVariantStocks {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.FKVariantStocks)
-			if ln > 1 && i < ln-1 {
-				o.R.FKVariantStocks[i] = o.R.FKVariantStocks[ln-1]
-			}
-			o.R.FKVariantStocks = o.R.FKVariantStocks[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

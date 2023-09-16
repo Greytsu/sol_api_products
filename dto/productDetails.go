@@ -18,6 +18,7 @@ type ProductDetails struct {
 func NewProductDetails(product *models.Product) *ProductDetails {
 	var productVariants ProductDetails
 	productVariants.ID = product.ID
+	productVariants.Reference = product.Reference
 	productVariants.CompanyID = product.CompanyID
 	productVariants.Name = product.Name
 	productVariants.CreateTime = product.CreateTime
@@ -28,6 +29,7 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 		var variant VariantStock
 		variant.ID = value.ID
 		variant.CompanyID = value.CompanyID
+		variant.Reference = value.Reference
 		variant.Name = value.Name
 		variant.StockTracking = value.StockTracking
 		variant.PurchasePrice = value.PurchasePrice
@@ -37,7 +39,7 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 		variant.FKProductID = value.FKProductID
 		stocks := value.R.GetFKVariantStocks()
 		if stocks != nil {
-			variant.Stock = *stocks[0]
+			variant.Stocks = stocks
 		}
 		variantsStock = append(variantsStock, variant)
 	}

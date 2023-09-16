@@ -548,7 +548,7 @@ func (warehouseL) LoadFKWarehouseStocks(ctx context.Context, e boil.ContextExecu
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -606,7 +606,7 @@ func (warehouseL) LoadFKWarehouseStocks(ctx context.Context, e boil.ContextExecu
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.FKWarehouseID) {
+			if local.ID == foreign.FKWarehouseID {
 				local.R.FKWarehouseStocks = append(local.R.FKWarehouseStocks, foreign)
 				if foreign.R == nil {
 					foreign.R = &stockR{}
@@ -628,7 +628,7 @@ func (o *Warehouse) AddFKWarehouseStocks(ctx context.Context, exec boil.ContextE
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.FKWarehouseID, o.ID)
+			rel.FKWarehouseID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -649,7 +649,7 @@ func (o *Warehouse) AddFKWarehouseStocks(ctx context.Context, exec boil.ContextE
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.FKWarehouseID, o.ID)
+			rel.FKWarehouseID = o.ID
 		}
 	}
 
@@ -670,80 +670,6 @@ func (o *Warehouse) AddFKWarehouseStocks(ctx context.Context, exec boil.ContextE
 			rel.R.FKWarehouse = o
 		}
 	}
-	return nil
-}
-
-// SetFKWarehouseStocks removes all previously related items of the
-// warehouse replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.FKWarehouse's FKWarehouseStocks accordingly.
-// Replaces o.R.FKWarehouseStocks with related.
-// Sets related.R.FKWarehouse's FKWarehouseStocks accordingly.
-func (o *Warehouse) SetFKWarehouseStocks(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Stock) error {
-	query := "update [products].[stock] set [fk_warehouse_id] = null where [fk_warehouse_id] = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.FKWarehouseStocks {
-			queries.SetScanner(&rel.FKWarehouseID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.FKWarehouse = nil
-		}
-		o.R.FKWarehouseStocks = nil
-	}
-
-	return o.AddFKWarehouseStocks(ctx, exec, insert, related...)
-}
-
-// RemoveFKWarehouseStocks relationships from objects passed in.
-// Removes related items from R.FKWarehouseStocks (uses pointer comparison, removal does not keep order)
-// Sets related.R.FKWarehouse.
-func (o *Warehouse) RemoveFKWarehouseStocks(ctx context.Context, exec boil.ContextExecutor, related ...*Stock) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.FKWarehouseID, nil)
-		if rel.R != nil {
-			rel.R.FKWarehouse = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("fk_warehouse_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.FKWarehouseStocks {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.FKWarehouseStocks)
-			if ln > 1 && i < ln-1 {
-				o.R.FKWarehouseStocks[i] = o.R.FKWarehouseStocks[ln-1]
-			}
-			o.R.FKWarehouseStocks = o.R.FKWarehouseStocks[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 
