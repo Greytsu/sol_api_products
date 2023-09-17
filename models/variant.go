@@ -694,7 +694,7 @@ func (variantL) LoadFKVariantBundleElements(ctx context.Context, e boil.ContextE
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -752,7 +752,7 @@ func (variantL) LoadFKVariantBundleElements(ctx context.Context, e boil.ContextE
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.FKVariantID) {
+			if local.ID == foreign.FKVariantID {
 				local.R.FKVariantBundleElements = append(local.R.FKVariantBundleElements, foreign)
 				if foreign.R == nil {
 					foreign.R = &bundleElementR{}
@@ -935,7 +935,7 @@ func (o *Variant) AddFKVariantBundleElements(ctx context.Context, exec boil.Cont
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.FKVariantID, o.ID)
+			rel.FKVariantID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -956,7 +956,7 @@ func (o *Variant) AddFKVariantBundleElements(ctx context.Context, exec boil.Cont
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.FKVariantID, o.ID)
+			rel.FKVariantID = o.ID
 		}
 	}
 
@@ -977,80 +977,6 @@ func (o *Variant) AddFKVariantBundleElements(ctx context.Context, exec boil.Cont
 			rel.R.FKVariant = o
 		}
 	}
-	return nil
-}
-
-// SetFKVariantBundleElements removes all previously related items of the
-// variant replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.FKVariant's FKVariantBundleElements accordingly.
-// Replaces o.R.FKVariantBundleElements with related.
-// Sets related.R.FKVariant's FKVariantBundleElements accordingly.
-func (o *Variant) SetFKVariantBundleElements(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*BundleElement) error {
-	query := "update [products].[bundle_element] set [fk_variant_id] = null where [fk_variant_id] = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.FKVariantBundleElements {
-			queries.SetScanner(&rel.FKVariantID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.FKVariant = nil
-		}
-		o.R.FKVariantBundleElements = nil
-	}
-
-	return o.AddFKVariantBundleElements(ctx, exec, insert, related...)
-}
-
-// RemoveFKVariantBundleElements relationships from objects passed in.
-// Removes related items from R.FKVariantBundleElements (uses pointer comparison, removal does not keep order)
-// Sets related.R.FKVariant.
-func (o *Variant) RemoveFKVariantBundleElements(ctx context.Context, exec boil.ContextExecutor, related ...*BundleElement) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.FKVariantID, nil)
-		if rel.R != nil {
-			rel.R.FKVariant = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("fk_variant_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.FKVariantBundleElements {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.FKVariantBundleElements)
-			if ln > 1 && i < ln-1 {
-				o.R.FKVariantBundleElements[i] = o.R.FKVariantBundleElements[ln-1]
-			}
-			o.R.FKVariantBundleElements = o.R.FKVariantBundleElements[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

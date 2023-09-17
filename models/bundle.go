@@ -7,7 +7,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/volatiletech/sqlboiler/v4/types"
 	"reflect"
 	"strconv"
 	"strings"
@@ -24,12 +23,13 @@ import (
 
 // Bundle is an object representing the database table.
 type Bundle struct {
-	ID         int           `boil:"id" json:"id" toml:"id" yaml:"id"`
-	CompanyID  int           `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
-	Name       string        `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Price      types.Decimal `boil:"price" json:"price" toml:"price" yaml:"price"`
-	CreateTime time.Time     `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
-	UpdateTime time.Time     `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
+	ID         int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CompanyID  int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
+	Reference  string    `boil:"reference" json:"reference" toml:"reference" yaml:"reference"`
+	Name       string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Price      float64   `boil:"price" json:"price" toml:"price" yaml:"price"`
+	CreateTime time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
+	UpdateTime time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
 
 	R *bundleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bundleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -38,6 +38,7 @@ type Bundle struct {
 var BundleColumns = struct {
 	ID         string
 	CompanyID  string
+	Reference  string
 	Name       string
 	Price      string
 	CreateTime string
@@ -45,6 +46,7 @@ var BundleColumns = struct {
 }{
 	ID:         "id",
 	CompanyID:  "company_id",
+	Reference:  "reference",
 	Name:       "name",
 	Price:      "price",
 	CreateTime: "create_time",
@@ -54,6 +56,7 @@ var BundleColumns = struct {
 var BundleTableColumns = struct {
 	ID         string
 	CompanyID  string
+	Reference  string
 	Name       string
 	Price      string
 	CreateTime string
@@ -61,6 +64,7 @@ var BundleTableColumns = struct {
 }{
 	ID:         "bundle.id",
 	CompanyID:  "bundle.company_id",
+	Reference:  "bundle.reference",
 	Name:       "bundle.name",
 	Price:      "bundle.price",
 	CreateTime: "bundle.create_time",
@@ -115,25 +119,33 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpertypes_Decimal struct{ field string }
+type whereHelperfloat64 struct{ field string }
 
-func (w whereHelpertypes_Decimal) EQ(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertypes_Decimal) NEQ(x types.Decimal) qm.QueryMod {
+func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
-func (w whereHelpertypes_Decimal) LT(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertypes_Decimal) LTE(x types.Decimal) qm.QueryMod {
+func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpertypes_Decimal) GT(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertypes_Decimal) GTE(x types.Decimal) qm.QueryMod {
+func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelperfloat64) IN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
 type whereHelpertime_Time struct{ field string }
@@ -160,15 +172,17 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 var BundleWhere = struct {
 	ID         whereHelperint
 	CompanyID  whereHelperint
+	Reference  whereHelperstring
 	Name       whereHelperstring
-	Price      whereHelpertypes_Decimal
+	Price      whereHelperfloat64
 	CreateTime whereHelpertime_Time
 	UpdateTime whereHelpertime_Time
 }{
 	ID:         whereHelperint{field: "[products].[bundle].[id]"},
 	CompanyID:  whereHelperint{field: "[products].[bundle].[company_id]"},
+	Reference:  whereHelperstring{field: "[products].[bundle].[reference]"},
 	Name:       whereHelperstring{field: "[products].[bundle].[name]"},
-	Price:      whereHelpertypes_Decimal{field: "[products].[bundle].[price]"},
+	Price:      whereHelperfloat64{field: "[products].[bundle].[price]"},
 	CreateTime: whereHelpertime_Time{field: "[products].[bundle].[create_time]"},
 	UpdateTime: whereHelpertime_Time{field: "[products].[bundle].[update_time]"},
 }
@@ -201,8 +215,8 @@ func (r *bundleR) GetFKBundleBundleElements() BundleElementSlice {
 type bundleL struct{}
 
 var (
-	bundleAllColumns            = []string{"id", "company_id", "name", "price", "create_time", "update_time"}
-	bundleColumnsWithoutDefault = []string{"company_id", "name", "price"}
+	bundleAllColumns            = []string{"id", "company_id", "reference", "name", "price", "create_time", "update_time"}
+	bundleColumnsWithoutDefault = []string{"company_id", "reference", "name", "price"}
 	bundleColumnsWithDefault    = []string{"id", "create_time", "update_time"}
 	bundlePrimaryKeyColumns     = []string{"id"}
 	bundleGeneratedColumns      = []string{"id"}
@@ -542,7 +556,7 @@ func (bundleL) LoadFKBundleBundleElements(ctx context.Context, e boil.ContextExe
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -600,7 +614,7 @@ func (bundleL) LoadFKBundleBundleElements(ctx context.Context, e boil.ContextExe
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.FKBundleID) {
+			if local.ID == foreign.FKBundleID {
 				local.R.FKBundleBundleElements = append(local.R.FKBundleBundleElements, foreign)
 				if foreign.R == nil {
 					foreign.R = &bundleElementR{}
@@ -622,7 +636,7 @@ func (o *Bundle) AddFKBundleBundleElements(ctx context.Context, exec boil.Contex
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.FKBundleID, o.ID)
+			rel.FKBundleID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -643,7 +657,7 @@ func (o *Bundle) AddFKBundleBundleElements(ctx context.Context, exec boil.Contex
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.FKBundleID, o.ID)
+			rel.FKBundleID = o.ID
 		}
 	}
 
@@ -664,80 +678,6 @@ func (o *Bundle) AddFKBundleBundleElements(ctx context.Context, exec boil.Contex
 			rel.R.FKBundle = o
 		}
 	}
-	return nil
-}
-
-// SetFKBundleBundleElements removes all previously related items of the
-// bundle replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.FKBundle's FKBundleBundleElements accordingly.
-// Replaces o.R.FKBundleBundleElements with related.
-// Sets related.R.FKBundle's FKBundleBundleElements accordingly.
-func (o *Bundle) SetFKBundleBundleElements(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*BundleElement) error {
-	query := "update [products].[bundle_element] set [fk_bundle_id] = null where [fk_bundle_id] = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.FKBundleBundleElements {
-			queries.SetScanner(&rel.FKBundleID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.FKBundle = nil
-		}
-		o.R.FKBundleBundleElements = nil
-	}
-
-	return o.AddFKBundleBundleElements(ctx, exec, insert, related...)
-}
-
-// RemoveFKBundleBundleElements relationships from objects passed in.
-// Removes related items from R.FKBundleBundleElements (uses pointer comparison, removal does not keep order)
-// Sets related.R.FKBundle.
-func (o *Bundle) RemoveFKBundleBundleElements(ctx context.Context, exec boil.ContextExecutor, related ...*BundleElement) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.FKBundleID, nil)
-		if rel.R != nil {
-			rel.R.FKBundle = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("fk_bundle_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.FKBundleBundleElements {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.FKBundleBundleElements)
-			if ln > 1 && i < ln-1 {
-				o.R.FKBundleBundleElements[i] = o.R.FKBundleBundleElements[ln-1]
-			}
-			o.R.FKBundleBundleElements = o.R.FKBundleBundleElements[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

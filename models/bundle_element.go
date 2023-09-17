@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,8 +25,8 @@ import (
 type BundleElement struct {
 	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CompanyID   int       `boil:"company_id" json:"company_id" toml:"company_id" yaml:"company_id"`
-	FKBundleID  null.Int  `boil:"fk_bundle_id" json:"fk_bundle_id,omitempty" toml:"fk_bundle_id" yaml:"fk_bundle_id,omitempty"`
-	FKVariantID null.Int  `boil:"fk_variant_id" json:"fk_variant_id,omitempty" toml:"fk_variant_id" yaml:"fk_variant_id,omitempty"`
+	FKBundleID  int       `boil:"fk_bundle_id" json:"bundle_id" toml:"fk_bundle_id" yaml:"fk_bundle_id"`
+	FKVariantID int       `boil:"fk_variant_id" json:"variant_id" toml:"fk_variant_id" yaml:"fk_variant_id"`
 	Quantity    int       `boil:"quantity" json:"quantity" toml:"quantity" yaml:"quantity"`
 	CreateTime  time.Time `boil:"create_time" json:"create_time" toml:"create_time" yaml:"create_time"`
 	UpdateTime  time.Time `boil:"update_time" json:"update_time" toml:"update_time" yaml:"update_time"`
@@ -74,57 +73,19 @@ var BundleElementTableColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Int struct{ field string }
-
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_Int) IN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_Int) NIN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var BundleElementWhere = struct {
 	ID          whereHelperint
 	CompanyID   whereHelperint
-	FKBundleID  whereHelpernull_Int
-	FKVariantID whereHelpernull_Int
+	FKBundleID  whereHelperint
+	FKVariantID whereHelperint
 	Quantity    whereHelperint
 	CreateTime  whereHelpertime_Time
 	UpdateTime  whereHelpertime_Time
 }{
 	ID:          whereHelperint{field: "[products].[bundle_element].[id]"},
 	CompanyID:   whereHelperint{field: "[products].[bundle_element].[company_id]"},
-	FKBundleID:  whereHelpernull_Int{field: "[products].[bundle_element].[fk_bundle_id]"},
-	FKVariantID: whereHelpernull_Int{field: "[products].[bundle_element].[fk_variant_id]"},
+	FKBundleID:  whereHelperint{field: "[products].[bundle_element].[fk_bundle_id]"},
+	FKVariantID: whereHelperint{field: "[products].[bundle_element].[fk_variant_id]"},
 	Quantity:    whereHelperint{field: "[products].[bundle_element].[quantity]"},
 	CreateTime:  whereHelpertime_Time{field: "[products].[bundle_element].[create_time]"},
 	UpdateTime:  whereHelpertime_Time{field: "[products].[bundle_element].[update_time]"},
@@ -508,9 +469,7 @@ func (bundleElementL) LoadFKBundle(ctx context.Context, e boil.ContextExecutor, 
 		if object.R == nil {
 			object.R = &bundleElementR{}
 		}
-		if !queries.IsNil(object.FKBundleID) {
-			args = append(args, object.FKBundleID)
-		}
+		args = append(args, object.FKBundleID)
 
 	} else {
 	Outer:
@@ -520,14 +479,12 @@ func (bundleElementL) LoadFKBundle(ctx context.Context, e boil.ContextExecutor, 
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.FKBundleID) {
+				if a == obj.FKBundleID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.FKBundleID) {
-				args = append(args, obj.FKBundleID)
-			}
+			args = append(args, obj.FKBundleID)
 
 		}
 	}
@@ -585,7 +542,7 @@ func (bundleElementL) LoadFKBundle(ctx context.Context, e boil.ContextExecutor, 
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.FKBundleID, foreign.ID) {
+			if local.FKBundleID == foreign.ID {
 				local.R.FKBundle = foreign
 				if foreign.R == nil {
 					foreign.R = &bundleR{}
@@ -632,9 +589,7 @@ func (bundleElementL) LoadFKVariant(ctx context.Context, e boil.ContextExecutor,
 		if object.R == nil {
 			object.R = &bundleElementR{}
 		}
-		if !queries.IsNil(object.FKVariantID) {
-			args = append(args, object.FKVariantID)
-		}
+		args = append(args, object.FKVariantID)
 
 	} else {
 	Outer:
@@ -644,14 +599,12 @@ func (bundleElementL) LoadFKVariant(ctx context.Context, e boil.ContextExecutor,
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.FKVariantID) {
+				if a == obj.FKVariantID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.FKVariantID) {
-				args = append(args, obj.FKVariantID)
-			}
+			args = append(args, obj.FKVariantID)
 
 		}
 	}
@@ -709,7 +662,7 @@ func (bundleElementL) LoadFKVariant(ctx context.Context, e boil.ContextExecutor,
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.FKVariantID, foreign.ID) {
+			if local.FKVariantID == foreign.ID {
 				local.R.FKVariant = foreign
 				if foreign.R == nil {
 					foreign.R = &variantR{}
@@ -750,7 +703,7 @@ func (o *BundleElement) SetFKBundle(ctx context.Context, exec boil.ContextExecut
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.FKBundleID, related.ID)
+	o.FKBundleID = related.ID
 	if o.R == nil {
 		o.R = &bundleElementR{
 			FKBundle: related,
@@ -767,39 +720,6 @@ func (o *BundleElement) SetFKBundle(ctx context.Context, exec boil.ContextExecut
 		related.R.FKBundleBundleElements = append(related.R.FKBundleBundleElements, o)
 	}
 
-	return nil
-}
-
-// RemoveFKBundle relationship.
-// Sets o.R.FKBundle to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *BundleElement) RemoveFKBundle(ctx context.Context, exec boil.ContextExecutor, related *Bundle) error {
-	var err error
-
-	queries.SetScanner(&o.FKBundleID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("fk_bundle_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.FKBundle = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.FKBundleBundleElements {
-		if queries.Equal(o.FKBundleID, ri.FKBundleID) {
-			continue
-		}
-
-		ln := len(related.R.FKBundleBundleElements)
-		if ln > 1 && i < ln-1 {
-			related.R.FKBundleBundleElements[i] = related.R.FKBundleBundleElements[ln-1]
-		}
-		related.R.FKBundleBundleElements = related.R.FKBundleBundleElements[:ln-1]
-		break
-	}
 	return nil
 }
 
@@ -830,7 +750,7 @@ func (o *BundleElement) SetFKVariant(ctx context.Context, exec boil.ContextExecu
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.FKVariantID, related.ID)
+	o.FKVariantID = related.ID
 	if o.R == nil {
 		o.R = &bundleElementR{
 			FKVariant: related,
@@ -847,39 +767,6 @@ func (o *BundleElement) SetFKVariant(ctx context.Context, exec boil.ContextExecu
 		related.R.FKVariantBundleElements = append(related.R.FKVariantBundleElements, o)
 	}
 
-	return nil
-}
-
-// RemoveFKVariant relationship.
-// Sets o.R.FKVariant to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *BundleElement) RemoveFKVariant(ctx context.Context, exec boil.ContextExecutor, related *Variant) error {
-	var err error
-
-	queries.SetScanner(&o.FKVariantID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("fk_variant_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.FKVariant = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.FKVariantBundleElements {
-		if queries.Equal(o.FKVariantID, ri.FKVariantID) {
-			continue
-		}
-
-		ln := len(related.R.FKVariantBundleElements)
-		if ln > 1 && i < ln-1 {
-			related.R.FKVariantBundleElements[i] = related.R.FKVariantBundleElements[ln-1]
-		}
-		related.R.FKVariantBundleElements = related.R.FKVariantBundleElements[:ln-1]
-		break
-	}
 	return nil
 }
 
