@@ -38,8 +38,13 @@ func NewProductDetails(product *models.Product) *ProductDetails {
 		variant.UpdateTime = value.UpdateTime
 		variant.FKProductID = value.FKProductID
 		stocks := value.R.GetFKVariantStocks()
+		variant.Stock = 0
 		if stocks != nil {
-			variant.Stocks = stocks
+			var stockAvailable int
+			for _, stock := range stocks {
+				stockAvailable = stockAvailable + stock.Quantity
+			}
+			variant.Stock = stockAvailable
 		}
 		variantsStock = append(variantsStock, variant)
 	}

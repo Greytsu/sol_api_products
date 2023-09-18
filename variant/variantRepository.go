@@ -2,6 +2,7 @@ package variant
 
 import (
 	"fr/greytsu/sol_api_products/models"
+	"fr/greytsu/sol_api_products/utils"
 	"github.com/rs/zerolog/log"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -44,6 +45,16 @@ func (variantRepository *VariantRepository) CreateVariant(variant *models.Varian
 	err := variant.Insert(context.Background(), variantRepository.db, boil.Infer())
 	log.Debug().Str("Name", variant.Name).Msg("Variant found")
 	return variant, err
+}
+
+func (variantRepository *VariantRepository) GetVariantBundles(id string, companyId string) ([]*models.Bundle, error) {
+	variant, err := models.Variants(qm.Load(qm.Rels(models.VariantRels.FKVariantBundleElements, models.BundleElementRels.FKBundle)), qm.Where("id=?", id), qm.Where("company_id=?", companyId)).One(context.Background(), variantRepository.db)
+	if err != nil {
+		return nil, err
+	}
+	bundles := utils.GetBundlesFromProduct(variant)
+	log.Debug().Str("Name", variant.Name).Msg("Product found")
+	return bundles, nil
 }
 
 func (variantRepository *VariantRepository) UpdateVariant(variant *models.Variant) error {

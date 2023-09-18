@@ -26,6 +26,10 @@ func (variantService *VariantService) GetVariant(id string, companyId string) (*
 	return variantService.VariantRepository.GetVariant(id, companyId)
 }
 
+func (variantService *VariantService) GetVariantBundles(id string, companyId string) ([]*models.Bundle, error) {
+	return variantService.VariantRepository.GetVariantBundles(id, companyId)
+}
+
 func (variantService *VariantService) GetVariantByReference(reference string, companyId string) (*models.Variant, error) {
 	return variantService.VariantRepository.GetVariantByReference(reference, companyId)
 }
