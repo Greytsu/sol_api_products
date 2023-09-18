@@ -7,7 +7,23 @@ import (
 )
 
 func RegisterBundleElementsRoutes(routerGroup *gin.RouterGroup, bundleElementService *BundleElementService) {
+	routerGroup.DELETE("/bundle-elements", getBundleElementByBundleAndVariant(bundleElementService))
 	routerGroup.DELETE("/bundle-elements/:id", deleteBundleElement(bundleElementService))
+}
+
+func getBundleElementByBundleAndVariant(bundleElementService *BundleElementService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyId := c.Request.Header["Company_id"][0]
+		bundleId := c.Query("bundle_id")
+		variantId := c.Query("variant_id")
+
+		products, err := bundleElementService.GetBundleElementByBundleAndVariant(bundleId, variantId, companyId)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, "Internal error, please try later")
+			return
+		}
+		c.IndentedJSON(http.StatusOK, products)
+	}
 }
 
 func deleteBundleElement(bundleElementService *BundleElementService) gin.HandlerFunc {
