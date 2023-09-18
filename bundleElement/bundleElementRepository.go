@@ -19,7 +19,7 @@ func NewBundleElementRepository(db *sql.DB) *BundleElementRepository {
 	return &BundleElementRepository{db: db}
 }
 
-func (bundleElementRepository *BundleElementRepository) GetBundleElementByWarehouseAndVariant(bundleId string, variantId string, companyId string) (*models.BundleElement, error) {
+func (bundleElementRepository *BundleElementRepository) GetBundleElementByBundleAndVariant(bundleId string, variantId string, companyId string) (*models.BundleElement, error) {
 	bundleElement, err := models.BundleElements(qm.Where("fk_bundle_id=?", bundleId), qm.Where("fk_variant_id=?", variantId), qm.Where("company_id=?", companyId)).One(context.Background(), bundleElementRepository.db)
 	if err != nil {
 		return nil, err
