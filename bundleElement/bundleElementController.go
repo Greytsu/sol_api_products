@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterBundleElementsRoutes(routerGroup *gin.RouterGroup, bundleElementService *BundleElementService) {
-	routerGroup.DELETE("/bundle-elements", getBundleElementByBundleAndVariant(bundleElementService))
+	routerGroup.GET("/bundle-elements", getBundleElementByBundleAndVariant(bundleElementService))
 	routerGroup.DELETE("/bundle-elements/:id", deleteBundleElement(bundleElementService))
 }
 
