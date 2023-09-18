@@ -13,10 +13,29 @@ import (
 )
 
 func RegisterVariantsRoutes(routerGroup *gin.RouterGroup, variantService *VariantService) {
+	routerGroup.GET("/variants/:id/", getVariant(variantService))
 	routerGroup.GET("/variants/:id/bundles", getVariantBundles(variantService))
 	routerGroup.PUT("/variants/:id", putVariant(variantService))
 	routerGroup.DELETE("/variants/:id", deleteVariant(variantService))
 	routerGroup.POST("/variants/:id/stocks", postStocks(variantService))
+}
+
+func getVariant(variantService *VariantService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		companyId := c.Request.Header["Company_id"][0]
+		id := c.Param("id")
+
+		product, err := variantService.GetVariant(id, companyId)
+		if err != nil {
+			if err.Error() == "sql: no rows in result set" {
+				c.IndentedJSON(http.StatusNotFound, "Variant not found")
+				return
+			}
+			c.IndentedJSON(http.StatusInternalServerError, "Internal error, please try later")
+			return
+		}
+		c.IndentedJSON(http.StatusOK, product)
+	}
 }
 
 func getVariantBundles(variantService *VariantService) gin.HandlerFunc {
@@ -27,7 +46,7 @@ func getVariantBundles(variantService *VariantService) gin.HandlerFunc {
 		product, err := variantService.GetVariantBundles(id, companyId)
 		if err != nil {
 			if err.Error() == "sql: no rows in result set" {
-				c.IndentedJSON(http.StatusNotFound, "Product not found")
+				c.IndentedJSON(http.StatusNotFound, "Variant not found")
 				return
 			}
 			c.IndentedJSON(http.StatusInternalServerError, "Internal error, please try later")
