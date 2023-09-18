@@ -45,7 +45,11 @@ func NewBundleDetails(bundle *models.Bundle) *BundleDetails {
 
 		stocks := variant.R.GetFKVariantStocks()
 		if stocks != nil {
-			variantStock.Stocks = stocks
+			var stockAvailable int
+			for _, stock := range stocks {
+				stockAvailable = stockAvailable + stock.Quantity
+			}
+			variantStock.Stock = stockAvailable
 		}
 
 		variants = append(variants, variantStock)
